@@ -1,0 +1,39 @@
+name: dseos
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.5.0
+  intl: ^0.18.1
+  shared_preferences: ^2.5.3
+  fl_chart: ^0.69.0
+  cupertino_icons: ^1.0.8
+  google_fonts: ^5.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    # Make sure all your asset files are listed here
+    - assets/logo.png
+    - assets/logo1.jpg
+
+# This section must be at the root level (no indentation)
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo1.jpg"
+  adaptive_icon_background: "#0075B2" # Your reference blue color
+  adaptive_icon_foreground: "assets/logo1.jpg" # Your logo with a transparent background works best here
+
