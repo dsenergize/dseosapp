@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import '../models/user_model.dart';
 
 class ApiService {
-  static const String baseUrl = "https://dsenergize-775014090096.europe-west1.run.app";
+  static const String baseUrl = "https://os.dsenergize.com";
 
   /// Get headers including authorization if token available.
   static Future<Map<String, String>> _getHeaders() async {
@@ -212,7 +212,7 @@ class ApiService {
     return [];
   }
 
-  // ===== FETCH AC POWER (NEW METHOD - GET) =====
+  // ===== FETCH AC POWE R (NEW METHOD - GET) =====
   static Future<List<Map<String, dynamic>>> fetchAcPower(
       String plantId, String plantName, DateTime date) async {
     final headers = await _getHeaders();

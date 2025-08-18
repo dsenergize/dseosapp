@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../widgets/rms_stat_card.dart';
+import 'rms_dashboard_screen.dart'; // Import the destination screen
 
 const kBlueColor = Color(0xFF0075B2);
 
@@ -13,44 +14,80 @@ class RMSScreen extends StatefulWidget {
 
 class _RMSScreenState extends State<RMSScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   Timer? _debounce;
-  List<Map<String, dynamic>> _searchResults = [];
-  bool _isSearching = false;
-  Map<String, dynamic>? _selectedPlant;
 
+  List<Map<String, dynamic>> _allPlants = [];
+  List<Map<String, dynamic>> _searchResults = [];
+  bool _isLoadingAllPlants = true;
+  bool _isSearching = false;
+  bool _showDropdown = false;
+
+  Map<String, dynamic>? _selectedPlant;
   Future<Map<String, dynamic>>? _dashboardFuture;
 
   @override
   void initState() {
     super.initState();
+    _fetchAllPlants();
     _searchController.addListener(_onSearchChanged);
+    _searchFocusNode.addListener(_onFocusChange);
   }
 
   @override
   void dispose() {
     _searchController.removeListener(_onSearchChanged);
+    _searchFocusNode.removeListener(_onFocusChange);
     _searchController.dispose();
+    _searchFocusNode.dispose();
     _debounce?.cancel();
     super.dispose();
   }
 
+  Future<void> _fetchAllPlants() async {
+    try {
+      final plants = await ApiService.fetchPlants();
+      if (mounted) {
+        setState(() {
+          _allPlants = plants;
+          _isLoadingAllPlants = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingAllPlants = false;
+        });
+      }
+    }
+  }
+
+  void _onFocusChange() {
+    if (_searchFocusNode.hasFocus && _searchController.text.isEmpty) {
+      setState(() {
+        _searchResults = _allPlants;
+        _showDropdown = true;
+      });
+    } else if (!_searchFocusNode.hasFocus) {
+      setState(() {
+        _showDropdown = false;
+      });
+    }
+  }
+
   void _onSearchChanged() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
-      if (_searchController.text.isNotEmpty) {
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      final query = _searchController.text;
+      if (query.isNotEmpty) {
         setState(() {
           _isSearching = true;
+          _showDropdown = true;
         });
-        ApiService.fetchPlants(searchQuery: _searchController.text).then((results) {
+        ApiService.fetchPlants(searchQuery: query).then((results) {
           if (mounted) {
             setState(() {
               _searchResults = results;
-              _isSearching = false;
-            });
-          }
-        }).catchError((error) {
-          if (mounted) {
-            setState(() {
               _isSearching = false;
             });
           }
@@ -58,8 +95,9 @@ class _RMSScreenState extends State<RMSScreen> {
       } else {
         if (mounted) {
           setState(() {
-            _searchResults = [];
+            _searchResults = _allPlants;
             _isSearching = false;
+            _showDropdown = _searchFocusNode.hasFocus;
           });
         }
       }
@@ -67,40 +105,70 @@ class _RMSScreenState extends State<RMSScreen> {
   }
 
   void _selectPlant(Map<String, dynamic> plant) {
+    // THE FIX: Temporarily remove the listener to prevent the search from re-triggering.
+    _searchController.removeListener(_onSearchChanged);
+
     setState(() {
       _selectedPlant = plant;
       _searchController.text = plant['plantName'] ?? '';
+      _showDropdown = false;
       _searchResults = [];
       _dashboardFuture = ApiService.fetchRmsDashboard(
         plantId: plant['id'],
         plantName: plant['plantName'],
         date: DateTime.now(),
       );
-      FocusScope.of(context).unfocus(); // Hide keyboard
+      FocusScope.of(context).unfocus();
     });
+
+    // Add the listener back after the UI has updated.
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  void _navigateToDashboard() {
+    if (_selectedPlant != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => RMSDashboardScreen(
+            plantId: _selectedPlant!['id'],
+            plantName: _selectedPlant!['plantName'],
+          ),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    // The main background is now blue
     return Scaffold(
-      body: Stack( // Use a Stack to overlay search results
+      backgroundColor: kBlueColor,
+      body: Stack(
         children: [
-          // Main content (dashboard grid)
-          Column(
-            children: [
-              const SizedBox(height: 88), // Space for the search bar
-              Expanded(
-                child: _buildDashboardContent(),
+          // The dashboard content is now pushed down
+          Padding(
+            padding: const EdgeInsets.only(top: 88.0),
+            child: Container(
+              // With a white background that has rounded top corners
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
               ),
-            ],
+              child: _buildDashboardContent(),
+            ),
           ),
-          // Search bar and results overlay
+          // Search bar and dropdown overlay
           Column(
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: TextField(
                   controller: _searchController,
+                  focusNode: _searchFocusNode,
                   style: const TextStyle(color: Colors.white),
                   cursorColor: Colors.white,
                   decoration: InputDecoration(
@@ -108,7 +176,7 @@ class _RMSScreenState extends State<RMSScreen> {
                     hintStyle: const TextStyle(color: Colors.white70),
                     prefixIcon: const Icon(Icons.search, color: Colors.white),
                     filled: true,
-                    fillColor: kBlueColor, // Blue background for search bar
+                    fillColor: Colors.white.withOpacity(0.15), // Adjusted color
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -118,13 +186,12 @@ class _RMSScreenState extends State<RMSScreen> {
                 ),
               ),
               if (_isSearching) const LinearProgressIndicator(color: kBlueColor),
-              // Conditionally display the search results dropdown
-              if (_searchResults.isNotEmpty)
+              if (_showDropdown && (_searchResults.isNotEmpty || _isLoadingAllPlants))
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16),
-                  constraints: const BoxConstraints(maxHeight: 200), // Limit dropdown height
+                  constraints: const BoxConstraints(maxHeight: 220),
                   decoration: BoxDecoration(
-                    color: kBlueColor,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
@@ -134,13 +201,15 @@ class _RMSScreenState extends State<RMSScreen> {
                       ),
                     ],
                   ),
-                  child: ListView.builder(
+                  child: _isLoadingAllPlants
+                      ? const Center(child: CircularProgressIndicator(color: kBlueColor))
+                      : ListView.builder(
                     shrinkWrap: true,
                     itemCount: _searchResults.length,
                     itemBuilder: (context, index) {
                       final plant = _searchResults[index];
                       return ListTile(
-                        title: Text(plant['plantName'] ?? 'N/A', style: const TextStyle(color: Colors.white)),
+                        title: Text(plant['plantName'] ?? 'N/A'),
                         onTap: () => _selectPlant(plant),
                       );
                     },
@@ -185,12 +254,15 @@ class _RMSScreenState extends State<RMSScreen> {
           ),
           itemBuilder: (context, idx) {
             final s = stats[idx];
-            return RmsCard(
-              title: s['title']!,
-              value: s['value']!,
-              unit: s['unit']!,
-              iconData: s['icon']!,
-              iconBgColor: s['color']!,
+            return GestureDetector(
+              onTap: _navigateToDashboard,
+              child: RmsCard(
+                title: s['title']!,
+                value: s['value']!,
+                unit: s['unit']!,
+                iconData: s['icon']!,
+                iconBgColor: s['color']!,
+              ),
             );
           },
         );
