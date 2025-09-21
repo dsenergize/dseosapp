@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:math';
+import '../theme.dart'; // Import your theme
 
 class LineChartWidget extends StatelessWidget {
   final List<Map<String, dynamic>> data;
@@ -11,125 +12,107 @@ class LineChartWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     if (data.isEmpty) {
       return Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
         child: Container(
           height: 300,
-          child: Center(
-            child: Text(
-              'No chart data available for this date.',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
+          alignment: Alignment.center,
+          child: const Text(
+            'No chart data available for this date.',
+            style: TextStyle(fontSize: 16, color: kTextSecondaryColor),
           ),
         ),
       );
     }
 
-    // Assuming the data contains 'date' and 'dailyEnergy'
     List<FlSpot> spots = data.asMap().entries.map((entry) {
       return FlSpot(entry.key.toDouble(), (entry.value['dailyEnergy'] as num?)?.toDouble() ?? 0);
     }).toList();
 
     double maxYValue = 0;
-    if (data.isNotEmpty) {
-      maxYValue = data.map((e) => (e['dailyEnergy'] as num?)?.toDouble() ?? 0).reduce(max) * 1.2;
-      if (maxYValue == 0) {
-        maxYValue = 100; // Set a default max value if all data is zero
-      }
+    if (spots.isNotEmpty) {
+      maxYValue = spots.map((spot) => spot.y).reduce(max) * 1.2;
+    }
+    if (maxYValue == 0) {
+      maxYValue = 100; // Default max if all values are zero
     }
 
-    // Calculate the interval, ensuring it's not zero
-    double interval = (maxYValue / 5).floor().toDouble();
-    if (interval == 0) {
-      interval = 1; // Set a minimum interval of 1 to prevent the crash
-    }
+    final interval = (maxYValue / 5).ceilToDouble();
 
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Inverter Energy vs Yield Graph',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              "Inverter Energy vs Yield",
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             Expanded(
               child: LineChart(
                 LineChartData(
                   gridData: FlGridData(
                     show: true,
-                    drawVerticalLine: true,
+                    drawVerticalLine: false,
+                    horizontalInterval: interval > 0 ? interval : 1,
                     getDrawingHorizontalLine: (value) {
-                      return const FlLine(
-                        color: Color(0xff37434d),
+                      return FlLine(
+                        color: Theme.of(context).dividerColor,
                         strokeWidth: 1,
-                      );
-                    },
-                    getDrawingVerticalLine: (value) {
-                      return const FlLine(
-                        color: Color(0xff37434d),
-                        strokeWidth: 1,
+                        dashArray: [5, 5],
                       );
                     },
                   ),
                   titlesData: FlTitlesData(
                     show: true,
+                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
+                        reservedSize: 30,
+                        interval: (data.length / 5).ceilToDouble(),
                         getTitlesWidget: (value, meta) {
                           if (value.toInt() < data.length) {
-                            return Text(data[value.toInt()]['date'], style: const TextStyle(color: Color(0xff68737d), fontSize: 10));
+                            final dateStr = data[value.toInt()]['date'];
+                            return SideTitleWidget(
+                              axisSide: meta.axisSide,
+                              space: 8.0,
+                              child: Text(dateStr ?? '', style: Theme.of(context).textTheme.bodySmall),
+                            );
                           }
                           return const Text('');
                         },
-                        reservedSize: 22,
-                        interval: 1,
                       ),
                     ),
                     leftTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
-                        getTitlesWidget: (value, meta) => Text(value.toInt().toString(), style: const TextStyle(color: Color(0xff68737d), fontSize: 10)),
-                        reservedSize: 28,
-                        interval: interval,
+                        reservedSize: 40,
+                        interval: interval > 0 ? interval : 1,
+                        getTitlesWidget: (value, meta) {
+                          return Text('${value.toInt()}', style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.left);
+                        },
                       ),
                     ),
-                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                   ),
-                  borderData: FlBorderData(
-                    show: true,
-                    border: Border.all(color: const Color(0xff37434d), width: 1),
-                  ),
-                  minX: 0,
-                  maxX: data.length.toDouble() - 1,
-                  minY: 0,
-                  maxY: maxYValue,
+                  borderData: FlBorderData(show: false),
                   lineBarsData: [
                     LineChartBarData(
                       spots: spots,
                       isCurved: true,
-                      gradient: LinearGradient(
-                        colors: [Colors.cyanAccent, Colors.blue],
+                      gradient: const LinearGradient(
+                        colors: [kSecondaryColor, kPrimaryColor],
                       ),
-                      barWidth: 5,
+                      barWidth: 4,
+                      isStrokeCapRound: true,
                       dotData: const FlDotData(show: false),
                       belowBarData: BarAreaData(
                         show: true,
                         gradient: LinearGradient(
-                          colors: [
-                            Colors.cyan.withOpacity(0.3),
-                            Colors.blue.withOpacity(0.3),
-                          ],
+                          colors: [kSecondaryColor.withOpacity(0.3), kPrimaryColor.withOpacity(0.0)],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
                         ),
                       ),
                     ),
@@ -143,3 +126,4 @@ class LineChartWidget extends StatelessWidget {
     );
   }
 }
+

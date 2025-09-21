@@ -7,9 +7,8 @@ import '../widgets/inverter_table.dart';
 import '../widgets/line_chart.dart';
 import '../widgets/bar_chart.dart';
 import '../widgets/date_selector.dart';
-import '../widgets/rms_dashboard_kpis_and_table.dart';
-
-const kBlueColor = Color(0xFF0075B2);
+import '../widgets/rms_dashboard_table.dart';
+import '../theme.dart';
 
 class RMSDashboardScreen extends StatefulWidget {
   final String? plantId;
@@ -79,38 +78,12 @@ class _RMSDashboardScreenState extends State<RMSDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FB),
       appBar: AppBar(
-        backgroundColor: kBlueColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (widget.plantName != null)
-              Text(
-                widget.plantName!,
-                style: GoogleFonts.roboto(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            Text(
-              "RMS Dashboard",
-              style: GoogleFonts.roboto(color: Colors.white70, fontSize: 13),
-            ),
-          ],
-        ),
+        title: Text(widget.plantName ?? "RMS Dashboard"),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
+            icon: const Icon(Icons.refresh),
             onPressed: _fetchDataAndRebuild,
-          ),
-          IconButton(
-            icon: const Icon(Icons.filter_alt_outlined, color: Colors.white),
-            onPressed: () {
-              // Implement filter action if needed
-            },
           ),
         ],
       ),
@@ -118,151 +91,141 @@ class _RMSDashboardScreenState extends State<RMSDashboardScreen> {
         onRefresh: () async {
           _fetchDataAndRebuild();
         },
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: DateSelector(
-                      selectedDate: _selectedDate,
-                      onDateSelected: _onDateSelected,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.edit, color: Colors.white, size: 16),
-                    label: const Text("Edit", style: TextStyle(color: Colors.white)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red[400],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onPressed: () {
-                      // Implement edit functionality
-                    },
-                  ),
-                ],
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: DateSelector(
+                  selectedDate: _selectedDate,
+                  onDateSelected: _onDateSelected,
+                ),
               ),
-              const SizedBox(height: 24),
-              FutureBuilder<Map<String, dynamic>>(
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              sliver: FutureBuilder<Map<String, dynamic>>(
                 future: dashboardFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator(color: kBlueColor));
+                    return const SliverToBoxAdapter(child: Center(child: CircularProgressIndicator(color: kPrimaryColor)));
                   }
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red)));
+                  if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const SliverToBoxAdapter(child: SizedBox.shrink());
                   }
-                  if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No dashboard data available.'));
-                  }
-
-                  // ===== THE ONLY CHANGE IS HERE =====
-                  // Use the snapshot data directly, as ApiService already extracted the inner map.
-                  final Map<String, dynamic> data = snapshot.data!;
-
-                  return RmsDashboardKpisAndTable(data: data);
+                  final data = snapshot.data!;
+                  return _buildKpiGrid(data);
                 },
               ),
-              const SizedBox(height: 24),
-              Text('Smart Alert', style: GoogleFonts.roboto(fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              FutureBuilder<List<Map<String, dynamic>>>(
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+                child: Text('Smart Alerts', style: Theme.of(context).textTheme.titleLarge),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              sliver: FutureBuilder<List<Map<String, dynamic>>>(
                 future: alertsFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const SliverToBoxAdapter(child: Center(child: CircularProgressIndicator()));
                   }
                   if (snapshot.hasError) {
-                    return Center(
-                      child: Text('Error loading alerts: ${snapshot.error}', style: const TextStyle(color: Colors.red)),
-                    );
+                    return SliverToBoxAdapter(child: Center(child: Text('Error loading alerts: ${snapshot.error}', style: const TextStyle(color: Colors.red))));
                   }
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No alerts found for this date.'));
+                    return const SliverToBoxAdapter(child: Center(child: Text('No alerts found for this date.')));
                   }
                   final alerts = snapshot.data!;
                   return InverterTable(inverterData: alerts);
                 },
               ),
-              const SizedBox(height: 24),
-              Text('Inverter Energy vs Yield Graph', style: GoogleFonts.roboto(fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 300,
-                child: FutureBuilder<List<Map<String, dynamic>>>(
-                  future: dailyEnergyFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (snapshot.hasError) {
-                      return Center(child: Text('Error loading chart data: ${snapshot.error}'));
-                    }
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(child: Text('No chart data available.'));
-                    }
-                    return LineChartWidget(data: snapshot.data!);
-                  },
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text('Live Weather Comparison', style: GoogleFonts.roboto(fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 300,
-                child: FutureBuilder<List<Map<String, dynamic>>>(
-                  future: poaRadiationFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (snapshot.hasError) {
-                      return Center(child: Text('Error loading weather data: ${snapshot.error}'));
-                    }
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(child: Text('No weather data available.'));
-                    }
-                    return FutureBuilder<List<Map<String, dynamic>>>(
-                      future: ambientTempFuture,
-                      builder: (context, ambientSnapshot) {
-                        if (ambientSnapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
-                        }
-                        if (ambientSnapshot.hasError) {
-                          return Center(child: Text('Error loading ambient temp data: ${ambientSnapshot.error}'));
-                        }
-                        final poaData = snapshot.data!;
-                        final ambientData = ambientSnapshot.data ?? [];
+            ),
+            _buildChartSection('Inverter Energy vs Yield', dailyEnergyFuture, (data) => LineChartWidget(data: data)),
+            _buildChartSection('Live Weather Comparison', poaRadiationFuture, (data) => BarChartWidget(data: data)),
 
-                        final combinedData = poaData.map((poaItem) {
-                          final matchingAmbient = ambientData.firstWhere(
-                                (ambientItem) => ambientItem['time'] == poaItem['time'],
-                            orElse: () => {'ambientTemp': 0.0},
-                          );
-                          return {
-                            'time': poaItem['time'],
-                            'radiation': poaItem['poa'],
-                            'ambientTemp': matchingAmbient['ambientTemp'],
-                          };
-                        }).toList();
+          ],
+        ),
+      ),
+    );
+  }
 
-                        return BarChartWidget(data: combinedData);
-                      },
-                    );
-                  },
-                ),
+  Widget _buildKpiGrid(Map<String, dynamic> data) {
+
+    num? safeParseNum(dynamic value) {
+      if (value is num) return value;
+      if (value is String) return num.tryParse(value);
+      return null;
+    }
+
+    final totalDailyEnergy = safeParseNum(data['totalDailyEnergy']);
+    final dayPR = safeParseNum(data['dayPR']);
+    final peakPOARadiation = safeParseNum(data['Peak_POA_Radiation']);
+    final dcCapacity = safeParseNum(data['dcCapacity']);
+
+    final kpis = [
+      {'title': 'Total Daily Energy', 'value': totalDailyEnergy, 'unit': 'kWh', 'icon': Icons.energy_savings_leaf_outlined, 'color': Colors.green},
+      {'title': 'Day PR', 'value': dayPR, 'unit': '%', 'icon': Icons.bolt_outlined, 'color': Colors.blue},
+      {'title': 'Peak POA Radiation', 'value': peakPOARadiation, 'unit': 'W/m²', 'icon': Icons.wb_sunny_outlined, 'color': Colors.orange},
+      {'title': 'DC Capacity', 'value': dcCapacity, 'unit': 'kW', 'icon': Icons.electrical_services_outlined, 'color': Colors.purple},
+    ];
+
+    return SliverGrid(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 1.1,
+      ),
+      delegate: SliverChildBuilderDelegate(
+            (context, index) {
+          final kpi = kpis[index];
+          return InfoCard(
+            title: kpi['title'] as String,
+            value: kpi['value'],
+            unit: kpi['unit'] as String,
+            icon: kpi['icon'] as IconData,
+            iconBgColor: kpi['color'] as Color,
+          );
+        },
+        childCount: kpis.length,
+      ),
+    );
+  }
+
+  Widget _buildChartSection(String title, Future<List<Map<String, dynamic>>> future, Widget Function(List<Map<String,dynamic>> data) chartBuilder) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 300,
+              child: FutureBuilder<List<Map<String, dynamic>>>(
+                future: future,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error loading chart data: ${snapshot.error}'));
+                  }
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('No chart data available.'));
+                  }
+                  return chartBuilder(snapshot.data!);
+                },
               ),
-              const SizedBox(height: 24),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
+

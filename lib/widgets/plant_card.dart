@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:dseos/theme.dart';
 
-class PlantCard extends StatelessWidget {
+class PlantCard extends StatefulWidget {
   final String plantName;
   final String capacity;
   final VoidCallback onTap;
@@ -14,68 +14,62 @@ class PlantCard extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<PlantCard> createState() => _PlantCardState();
+}
+
+class _PlantCardState extends State<PlantCard> {
+  bool _isToggled = true;
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
+    return InkWell(
+      onTap: widget.onTap,
+      borderRadius: BorderRadius.circular(20),
       child: Card(
-        elevation: 4,
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Icon on the left
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.orange[300], // Reference yellow/orange
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.wb_sunny,
-                  color: Colors.white,
-                  size: 32,
-                ),
-              ),
-              const SizedBox(width: 16),
-              // Plant name and capacity in the middle
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      plantName,
-                      style: GoogleFonts.roboto(
-                        color: const Color(0xFF0075B2), // Reference blue
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.wb_sunny_outlined, size: 32, color: kPrimaryColor),
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: Switch(
+                      value: _isToggled,
+                      onChanged: (value) {
+                        setState(() {
+                          _isToggled = value;
+                        });
+                      },
+                      activeColor: kPrimaryColor,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Capacity: $capacity kW',
-                      style: GoogleFonts.roboto(
-                        color: Colors.black54,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
+                  )
+                ],
               ),
-              // Arrow on the right
-              const Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.black,
-                size: 20,
-              ),
+              const Spacer(),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.plantName,
+                    style: Theme.of(context).textTheme.titleMedium,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${widget.capacity} kW',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              )
             ],
           ),
         ),

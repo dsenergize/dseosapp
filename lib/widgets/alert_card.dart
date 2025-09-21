@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../theme.dart';
 
 class AlertCard extends StatelessWidget {
   final Map<String, dynamic> alert;
@@ -17,58 +17,44 @@ class AlertCard extends StatelessWidget {
     if (timestampStr.isNotEmpty) {
       try {
         final dateTime = DateTime.parse(timestampStr);
-        formattedTime = DateFormat('MMM dd, yyyy hh:mm a').format(dateTime);
+        formattedTime = DateFormat('MMM dd, hh:mm a').format(dateTime);
       } catch (e) {
-        // Handle potential parsing errors
+        // Handle parsing errors silently
       }
     }
 
-    final Color statusColor = status.toLowerCase() == 'generating' ? Colors.green : Colors.red;
+    final bool isGenerating = status.toLowerCase() == 'generating';
+    final Color statusColor = isGenerating ? Colors.green : Colors.red;
 
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.warning_amber_rounded, color: statusColor, size: 28),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: GoogleFonts.roboto(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const Spacer(),
-            Text(
-              'Status: $status',
-              style: GoogleFonts.roboto(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: statusColor,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              formattedTime,
-              style: GoogleFonts.roboto(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        leading: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: statusColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            isGenerating ? Icons.check_circle_outline_rounded : Icons.error_outline_rounded,
+            color: statusColor,
+            size: 28,
+          ),
+        ),
+        title: Text(
+          title,
+          style: Theme.of(context).textTheme.titleMedium,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Text(
+          status,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: statusColor, fontWeight: FontWeight.w600),
+        ),
+        trailing: Text(
+          formattedTime,
+          style: Theme.of(context).textTheme.bodySmall,
         ),
       ),
     );

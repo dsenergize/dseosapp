@@ -4,7 +4,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import '../models/user_model.dart';
 
+// Custom exception for handling authentication errors
+class AuthException implements Exception {
+  final String message;
+  AuthException(this.message);
+}
+
 class ApiService {
+  // THE FIX: Reverted the baseUrl to the original, correct region.
   static const String baseUrl = "https://os.dsenergize.com";
 
   /// Get headers including authorization if token available.
@@ -15,6 +22,13 @@ class ApiService {
       'Content-Type': 'application/json',
       if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
     };
+  }
+
+  // Helper to check for auth errors
+  static void _handleAuthError(http.Response response) {
+    if (response.statusCode == 401 || response.statusCode == 403) {
+      throw AuthException('Invalid or expired token. Please log in again.');
+    }
   }
 
   // ===== LOGIN =====
@@ -55,6 +69,7 @@ class ApiService {
     try {
       final response = await http.get(url, headers: headers);
       print("🌱 Fetch/Search Plants: ${response.statusCode} ${response.body}");
+      _handleAuthError(response); // Check for auth errors
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true && data['data'] is List) {
@@ -69,6 +84,7 @@ class ApiService {
         }
       }
     } catch (e) {
+      if (e is AuthException) rethrow; // Re-throw auth exception to be caught by UI
       throw Exception('fetchPlants failed: $e');
     }
     throw Exception('Failed to load plants');
@@ -97,6 +113,7 @@ class ApiService {
         }),
       );
       print("📊 RMS Dashboard: ${response.statusCode} ${response.body}");
+      _handleAuthError(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true && data['data'] is Map<String, dynamic>) {
@@ -104,6 +121,7 @@ class ApiService {
         }
       }
     } catch (e) {
+      if (e is AuthException) rethrow;
       throw Exception('fetchRmsDashboard failed: $e');
     }
     throw Exception('Failed to load RMS Dashboard');
@@ -131,6 +149,7 @@ class ApiService {
         }),
       );
       print("🚨 Alerts: ${response.statusCode} ${response.body}");
+      _handleAuthError(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['data'] != null && data['data']['deviceType'] != null && data['data']['deviceType']['inverter'] is List) {
@@ -138,11 +157,14 @@ class ApiService {
         }
       }
     } catch (e) {
+      if (e is AuthException) rethrow;
       throw Exception('fetchAlerts failed: $e');
     }
     throw Exception('Failed to load alerts');
   }
 
+  // ... (The rest of the methods should also have the _handleAuthError check)
+  // For brevity, I've omitted the rest, but you should add the check to all authenticated API calls.
   // ===== FETCH DAILY ENERGY (POST) =====
   static Future<List<Map<String, dynamic>>> fetchDailyEnergy(
       String plantId, DateTime date) async {
@@ -158,6 +180,7 @@ class ApiService {
         }),
       );
       print("⚡ Daily Energy: ${response.statusCode} ${response.body}");
+      _handleAuthError(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data is List) {
@@ -165,6 +188,7 @@ class ApiService {
         }
       }
     } catch (e) {
+      if (e is AuthException) rethrow;
       throw Exception('fetchDailyEnergy failed: $e');
     }
     return [];
@@ -179,6 +203,7 @@ class ApiService {
     try {
       final response = await http.get(url, headers: headers);
       print("☀️ POA Radiation: ${response.statusCode} ${response.body}");
+      _handleAuthError(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data is List) {
@@ -186,6 +211,7 @@ class ApiService {
         }
       }
     } catch (e) {
+      if (e is AuthException) rethrow;
       throw Exception('fetchPoaRadiation failed: $e');
     }
     return [];
@@ -200,6 +226,7 @@ class ApiService {
     try {
       final response = await http.get(url, headers: headers);
       print("🌡️ Ambient Temp: ${response.statusCode} ${response.body}");
+      _handleAuthError(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data is List) {
@@ -207,6 +234,7 @@ class ApiService {
         }
       }
     } catch (e) {
+      if (e is AuthException) rethrow;
       throw Exception('fetchAmbientTemp failed: $e');
     }
     return [];
@@ -221,6 +249,7 @@ class ApiService {
     try {
       final response = await http.get(url, headers: headers);
       print("🔌 AC Power: ${response.statusCode} ${response.body}");
+      _handleAuthError(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data is List) {
@@ -228,6 +257,7 @@ class ApiService {
         }
       }
     } catch (e) {
+      if (e is AuthException) rethrow;
       throw Exception('fetchAcPower failed: $e');
     }
     return [];
@@ -242,6 +272,7 @@ class ApiService {
     try {
       final response = await http.get(url, headers: headers);
       print("🌞 Solar Power: ${response.statusCode} ${response.body}");
+      _handleAuthError(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data is List) {
@@ -249,6 +280,7 @@ class ApiService {
         }
       }
     } catch (e) {
+      if (e is AuthException) rethrow;
       throw Exception('fetchSolarPower failed: $e');
     }
     return [];
@@ -263,6 +295,7 @@ class ApiService {
     try {
       final response = await http.get(url, headers: headers);
       print("🌬️ Wind Speed: ${response.statusCode} ${response.body}");
+      _handleAuthError(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data is List) {
@@ -270,6 +303,7 @@ class ApiService {
         }
       }
     } catch (e) {
+      if (e is AuthException) rethrow;
       throw Exception('fetchWindSpeed failed: $e');
     }
     return [];
@@ -284,6 +318,7 @@ class ApiService {
     try {
       final response = await http.get(url, headers: headers);
       print("📈 Lifetime Export: ${response.statusCode} ${response.body}");
+      _handleAuthError(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data is List) {
@@ -291,6 +326,7 @@ class ApiService {
         }
       }
     } catch (e) {
+      if (e is AuthException) rethrow;
       throw Exception('fetchLifetimeExport failed: $e');
     }
     return [];
@@ -311,6 +347,7 @@ class ApiService {
         }),
       );
       print("📉 Daily Export: ${response.statusCode} ${response.body}");
+      _handleAuthError(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data is List) {
@@ -318,6 +355,7 @@ class ApiService {
         }
       }
     } catch (e) {
+      if (e is AuthException) rethrow;
       throw Exception('fetchDailyExport failed: $e');
     }
     return [];
@@ -332,6 +370,7 @@ class ApiService {
     try {
       final response = await http.get(url, headers: headers);
       print("🌞 POA Insolation: ${response.statusCode} ${response.body}");
+      _handleAuthError(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data is List) {
@@ -339,6 +378,7 @@ class ApiService {
         }
       }
     } catch (e) {
+      if (e is AuthException) rethrow;
       throw Exception('fetchPoaInsolation failed: $e');
     }
     return [];
@@ -359,6 +399,7 @@ class ApiService {
         }),
       );
       print("📈 PR Meters: ${response.statusCode} ${response.body}");
+      _handleAuthError(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data is List) {
@@ -366,6 +407,7 @@ class ApiService {
         }
       }
     } catch (e) {
+      if (e is AuthException) rethrow;
       throw Exception('fetchPrMeters failed: $e');
     }
     return [];
@@ -388,11 +430,13 @@ class ApiService {
         }),
       );
       print("🔒 Change Password: ${response.statusCode} ${response.body}");
+      _handleAuthError(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data['success'] == true;
       }
     } catch (e) {
+      if (e is AuthException) rethrow;
       throw Exception('changePassword failed: $e');
     }
     return false;
@@ -415,6 +459,7 @@ class ApiService {
         }),
       );
       print("✏️ Update Profile: ${response.statusCode} ${response.body}");
+      _handleAuthError(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true && data['user'] != null) {
@@ -425,6 +470,7 @@ class ApiService {
         }
       }
     } catch (e) {
+      if (e is AuthException) rethrow;
       throw Exception('updateProfile failed: $e');
     }
     return null;

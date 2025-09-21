@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../widgets/plant_card.dart';
 import 'plant_info_screen.dart';
-
-const kBlueColor = Color(0xFF0075B2);
+import '../theme.dart';
 
 class PlantListScreen extends StatefulWidget {
   const PlantListScreen({super.key});
@@ -13,168 +12,147 @@ class PlantListScreen extends StatefulWidget {
 }
 
 class _PlantListScreenState extends State<PlantListScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  List<Map<String, dynamic>> _allPlants = [];
-  List<Map<String, dynamic>> _filteredPlants = [];
-  bool _isLoading = true;
-  bool _hasError = false;
+  late Future<List<Map<String, dynamic>>> _plantsFuture;
 
   @override
   void initState() {
     super.initState();
-    _fetchPlants();
-    _searchController.addListener(_filterPlants);
-  }
-
-  @override
-  void dispose() {
-    _searchController.removeListener(_filterPlants);
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _fetchPlants() async {
-    if (!mounted) return;
-    setState(() {
-      _isLoading = true;
-      _hasError = false;
-    });
-
-    try {
-      final plants = await ApiService.fetchPlants();
-      if (mounted) {
-        setState(() {
-          _allPlants = plants;
-          _filteredPlants = plants;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _hasError = true;
-        });
-      }
-    }
-  }
-
-  void _filterPlants() {
-    final query = _searchController.text.toLowerCase();
-    setState(() {
-      _filteredPlants = _allPlants.where((plant) {
-        final plantName = (plant['plantName'] as String?)?.toLowerCase() ?? '';
-        return plantName.contains(query);
-      }).toList();
-    });
+    _plantsFuture = ApiService.fetchPlants();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBlueColor,
-      body: RefreshIndicator(
-        onRefresh: _fetchPlants,
-        color: kBlueColor,
-        child: Column(
-          children: [
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: TextField(
-                controller: _searchController,
-                style: const TextStyle(color: Colors.white),
-                cursorColor: Colors.white,
-                decoration: InputDecoration(
-                  hintText: "Search Plants...",
-                  hintStyle: const TextStyle(color: Colors.white70),
-                  prefixIcon: const Icon(Icons.search, color: Colors.white),
-                  filled: true,
-                  fillColor: Colors.white.withOpacity(0.15),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            setState(() {
+              _plantsFuture = ApiService.fetchPlants();
+            });
+          },
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: _buildHeader(context),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.all(16),
+                sliver: FutureBuilder<List<Map<String, dynamic>>>(
+                  future: _plantsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const SliverToBoxAdapter(
+                        child: Center(child: CircularProgressIndicator(color: kPrimaryColor)),
+                      );
+                    }
+                    if (snapshot.hasError) {
+                      return SliverToBoxAdapter(
+                        child: Center(child: Text("Error: ${snapshot.error}", style: const TextStyle(color: Colors.red))),
+                      );
+                    }
+                    final plants = snapshot.data ?? [];
+                    if (plants.isEmpty) {
+                      return const SliverToBoxAdapter(
+                        child: Center(child: Text("No plants found")),
+                      );
+                    }
+                    return SliverGrid(
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 0.85,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                          final plant = plants[index];
+                          final String name = plant['plantName'] ?? 'Unnamed Plant';
+                          final String capacity = plant['dcCapacity']?.toString() ?? '-';
+                          return PlantCard(
+                            plantName: name,
+                            capacity: capacity,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => PlantInfoScreen(plant: plant),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        childCount: plants.length,
+                      ),
+                    );
+                  },
                 ),
               ),
-            ),
-            // Plant List Area
-            Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                ),
-                child: _buildBody(),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildBody() {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: kBlueColor));
-    }
-
-    if (_hasError) {
-      return _buildOfflineUI();
-    }
-
-    if (_filteredPlants.isEmpty) {
-      return const Center(child: Text("No plants found."));
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 12.0), // Added top padding
-      itemCount: _filteredPlants.length,
-      itemBuilder: (context, index) {
-        final plant = _filteredPlants[index];
-        final String name = plant['plantName'] ?? 'Unnamed Plant';
-        final String capacity = plant['dcCapacity']?.toString() ?? '-';
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12.0),
-          child: PlantCard(
-            plantName: name,
-            capacity: capacity,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => PlantInfoScreen(plant: plant),
-                ),
-              );
-            },
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Hey, Alex Smith", // Placeholder name
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Welcome back to your dashboard",
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+              const CircleAvatar(
+                radius: 24,
+                backgroundImage: NetworkImage('https://placehold.co/100x100/29B583/FFFFFF?text=A'), // Placeholder
+              ),
+            ],
           ),
-        );
-      },
+          const SizedBox(height: 24),
+          // Placeholder for filter buttons
+          SizedBox(
+            height: 40,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                _buildFilterChip("All Plants", true),
+                _buildFilterChip("Rooftop", false),
+                _buildFilterChip("Ground Mount", false),
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 
-  // Widget for displaying the offline state
-  Widget _buildOfflineUI() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.cloud_off, color: Colors.grey[400], size: 48),
-          const SizedBox(height: 16),
-          const Text(
-            "You are offline",
-            style: TextStyle(color: Colors.black54, fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            "Pull down to refresh",
-            style: TextStyle(color: Colors.grey, fontSize: 14),
-          ),
-        ],
+  Widget _buildFilterChip(String label, bool isSelected) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: Chip(
+        label: Text(label),
+        backgroundColor: isSelected ? kPrimaryColor : Colors.white,
+        labelStyle: TextStyle(
+          color: isSelected ? Colors.white : kTextColor,
+          fontWeight: FontWeight.w600,
+        ),
+        side: BorderSide(color: isSelected ? kPrimaryColor : Colors.grey.shade300),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }

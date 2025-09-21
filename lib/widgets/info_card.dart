@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../theme.dart';
 
 class InfoCard extends StatelessWidget {
   final String title;
   final dynamic value;
   final String unit;
   final IconData icon;
-  final Color iconColor;
   final Color iconBgColor;
 
   const InfoCard({
@@ -15,8 +14,7 @@ class InfoCard extends StatelessWidget {
     required this.value,
     this.unit = '',
     required this.icon,
-    this.iconColor = Colors.white,
-    this.iconBgColor = const Color(0xFF2026D3),
+    this.iconBgColor = kPrimaryColor,
   }) : super(key: key);
 
   @override
@@ -24,62 +22,50 @@ class InfoCard extends StatelessWidget {
     String displayValue;
     if (value == null) {
       displayValue = 'N/A';
+    } else if (value is double) {
+      displayValue = value.toStringAsFixed(2);
     } else {
       displayValue = value.toString();
     }
 
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: iconBgColor.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: iconBgColor, size: 28),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: iconBgColor,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(icon, color: iconColor, size: 20),
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      title,
-                      style: GoogleFonts.roboto(
-                        fontSize: 12,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w600,
+                const SizedBox(height: 4),
+                RichText(
+                  text: TextSpan(
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: kTextColor),
+                    children: [
+                      TextSpan(text: displayValue),
+                      TextSpan(
+                        text: ' ${displayValue != 'N/A' ? unit : ''}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kTextSecondaryColor),
                       ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    ],
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 8),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text(
-                '$displayValue ${displayValue != 'N/A' ? unit : ''}',
-                style: GoogleFonts.roboto(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
             ),
           ],
         ),
