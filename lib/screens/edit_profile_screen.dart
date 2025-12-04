@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 import '../services/api_service.dart';
-
-const kBlueColor = Color(0xFF0075B2);
+import '../theme.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final UserModel user;
@@ -44,14 +43,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     });
 
     try {
-      // FIX ✅ : updatedUser has type UserModel?, not bool
       final updatedUser = await ApiService.updateProfile(
         name: _nameController.text.trim(),
         email: _emailController.text.trim(),
       );
 
       if (updatedUser != null) {
-        // Save new user info locally
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('user_data', jsonEncode(updatedUser.toJson()));
 
@@ -62,18 +59,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
         Navigator.pop(context, updatedUser);
       } else {
-        setState(() {
-          _error = "Failed to update profile";
-        });
+        setState(() => _error = "Failed to update profile");
       }
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-      });
+      setState(() => _error = e.toString());
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -91,52 +82,81 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text("Edit Profile"),
-        backgroundColor: kBlueColor,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: "Name",
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) =>
-                value == null || value.isEmpty ? "Please enter name" : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: "Email",
-                  border: OutlineInputBorder(),
-                ),
-                validator: _validateEmail,
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 20),
-              if (_error != null)
-                Text(
-                  _error!,
-                  style: const TextStyle(color: Colors.red),
-                ),
-              const SizedBox(height: 10),
-              _isLoading
-                  ? const Center(child: CircularProgressIndicator(color: kBlueColor))
-                  : ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: kBlueColor),
-                onPressed: _saveProfile,
-                child: const Text("Save Changes"),
-              ),
-            ],
-          ),
+        title: const Text(
+          "Edit Profile",
+          style: TextStyle(color: kPrimaryColor),
         ),
+        backgroundColor: Colors.white,
+        elevation: 1,
+        iconTheme: const IconThemeData(color: kPrimaryColor),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Card(
+            elevation: 2,
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(
+                        labelText: "Name",
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) => value == null || value.isEmpty
+                          ? "Please enter name"
+                          : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(
+                        labelText: "Email",
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: _validateEmail,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          if (_error != null)
+            Text(
+              _error!,
+              style: const TextStyle(color: Colors.red),
+              textAlign: TextAlign.center,
+            ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: kPrimaryColor,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: _isLoading ? null : _saveProfile,
+            child: _isLoading
+                ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                  color: Colors.white, strokeWidth: 3),
+            )
+                : const Text("Save Changes",
+                style: TextStyle(fontSize: 16, color: Colors.white)),
+          ),
+        ],
       ),
     );
   }

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
-
-const kBlueColor = Color(0xFF0075B2);
+import '../theme.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -29,22 +28,17 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   Future<void> _changePassword() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_newPasswordController.text != _confirmPasswordController.text) {
+      setState(() => _error = "New passwords do not match.");
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _error = null;
     });
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
-      if (token == null) {
-        setState(() {
-          _error = "Not logged in.";
-          _isLoading = false;
-        });
-        return;
-      }
-
       final success = await ApiService.changePassword(
         currentPassword: _currentPasswordController.text.trim(),
         newPassword: _newPasswordController.text.trim(),
@@ -57,66 +51,111 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         );
         Navigator.pop(context);
       } else {
-        setState(() {
-          _error = "Failed to change password.";
-        });
+        setState(() => _error =
+        "Failed to change password. Please check your current password.");
       }
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-      });
+      setState(() => _error = e.toString());
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  Widget _buildPasswordField(
-      {required String label,
-        required TextEditingController controller,
-        bool obscureText = true}) {
-    return TextFormField(
-      controller: controller,
-      obscureText: obscureText,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
-      validator: (value) =>
-      value == null || value.isEmpty ? "Please enter $label" : null,
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Change Password"), backgroundColor: kBlueColor),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              _buildPasswordField(label: "Current Password", controller: _currentPasswordController),
-              const SizedBox(height: 16),
-              _buildPasswordField(label: "New Password", controller: _newPasswordController),
-              const SizedBox(height: 16),
-              _buildPasswordField(label: "Confirm New Password", controller: _confirmPasswordController),
-              const SizedBox(height: 16),
-              if (_error != null)
-                Text(_error!, style: const TextStyle(color: Colors.red)),
-              const SizedBox(height: 10),
-              _isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: kBlueColor),
-                onPressed: _changePassword,
-                child: const Text("Update Password"),
-              ),
-            ],
-          ),
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        title: const Text(
+          "Change Password",
+          style: TextStyle(color: kPrimaryColor),
         ),
+        backgroundColor: Colors.white,
+        elevation: 1,
+        iconTheme: const IconThemeData(color: kPrimaryColor),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Card(
+            elevation: 2,
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _currentPasswordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: "Current Password",
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) => value == null || value.isEmpty
+                          ? "Please enter your current password"
+                          : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _newPasswordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: "New Password",
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) => value == null || value.isEmpty
+                          ? "Please enter a new password"
+                          : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _confirmPasswordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: "Confirm New Password",
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) => value == null || value.isEmpty
+                          ? "Please confirm your new password"
+                          : null,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          if (_error != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Text(
+                _error!,
+                style: const TextStyle(color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: kPrimaryColor,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: _isLoading ? null : _changePassword,
+            child: _isLoading
+                ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                  color: Colors.white, strokeWidth: 3),
+            )
+                : const Text("Update Password",
+                style: TextStyle(fontSize: 16, color: Colors.white)),
+          ),
+        ],
       ),
     );
   }
