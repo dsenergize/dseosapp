@@ -41,7 +41,7 @@ class _PlantCardState extends State<PlantCard> {
                     child: Text(
                       widget.plantName,
                       style: Theme.of(context).textTheme.titleMedium,
-                      maxLines: 2,
+                      maxLines: 4,
                       overflow: TextOverflow.ellipsis,
                     ),
                   )
