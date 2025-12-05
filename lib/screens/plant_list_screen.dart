@@ -18,7 +18,7 @@ class _PlantListScreenState extends State<PlantListScreen> {
   late Future<List<Map<String, dynamic>>> _plantsFuture;
   UserModel? _user;
   String _selectedFilter = 'All Plants';
-  final List<String> _filters = ['All Plants', 'Rooftop', 'Ground Mount'];
+  final List<String> _filters = ['All Plants', 'Rooftop', 'GroundMount'];
 
   @override
   void initState() {
@@ -38,15 +38,14 @@ class _PlantListScreenState extends State<PlantListScreen> {
   }
 
   // Helper function to filter plants locally
-  List<Map<String, dynamic>> _filterPlants(
-      List<Map<String, dynamic>> plants) {
+  List<Map<String, dynamic>> _filterPlants(List<Map<String, dynamic>> plants) {
     if (_selectedFilter == 'All Plants') {
       return plants;
     }
     return plants
         .where((plant) =>
-    plant['projectType']?.toString().toLowerCase() ==
-        _selectedFilter.toLowerCase())
+            plant['projectType']?.toString().toLowerCase() ==
+            _selectedFilter.toLowerCase())
         .toList();
   }
 
@@ -73,8 +72,8 @@ class _PlantListScreenState extends State<PlantListScreen> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const SliverToBoxAdapter(
                         child: Center(
-                            child:
-                            CircularProgressIndicator(color: kPrimaryColor)),
+                            child: CircularProgressIndicator(
+                                color: kPrimaryColor)),
                       );
                     }
                     if (snapshot.hasError) {
@@ -94,14 +93,14 @@ class _PlantListScreenState extends State<PlantListScreen> {
                     }
                     return SliverGrid(
                       gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
                         childAspectRatio: 0.85,
                       ),
                       delegate: SliverChildBuilderDelegate(
-                            (context, index) {
+                        (context, index) {
                           final plant = filteredPlants[index];
                           final String name =
                               plant['plantName'] ?? 'Unnamed Plant';
@@ -169,8 +168,8 @@ class _PlantListScreenState extends State<PlantListScreen> {
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: _filters
-                  .map((filter) => _buildFilterChip(
-                  filter, _selectedFilter == filter))
+                  .map((filter) =>
+                      _buildFilterChip(filter, _selectedFilter == filter))
                   .toList(),
             ),
           )

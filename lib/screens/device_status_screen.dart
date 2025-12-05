@@ -27,8 +27,8 @@ const Map<String, Map<String, Color>> statusPalette = {
     'bg': Color(0xFFFEF3C7),
     'text': Color(0xFF92400E),
   },
-  'Unknown': {
-    'pieFill': Color(0xFFa1a1aa),
+  'Offline': {
+    'pieFill': Color(0xFF1E5BFF),
     'bg': Color(0xFFE5E7EB),
     'text': Color(0xFF374151),
   },
@@ -74,7 +74,7 @@ class _DeviceStatusScreenState extends State<DeviceStatusScreen> {
         List<Map<String, dynamic>> deviceList) {
       final statusCounts = <String, int>{};
       for (var device in deviceList) {
-        final status = device['status'] as String? ?? 'Unknown';
+        final status = device['status'] as String? ?? 'Offline';
         statusCounts[status] = (statusCounts[status] ?? 0) + 1;
       }
       return {
@@ -260,7 +260,7 @@ class _DeviceStatusCardState extends State<_DeviceStatusCard> {
                     final status = entry.key;
                     final count = entry.value;
                     final colors =
-                        statusPalette[status] ?? statusPalette['Unknown']!;
+                        statusPalette[status] ?? statusPalette['Offline']!;
                     return Padding(
                       padding: const EdgeInsets.only(left: 8.0),
                       child: Container(
@@ -318,9 +318,9 @@ class _DeviceStatusCardState extends State<_DeviceStatusCard> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: widget.devices.map((device) {
-                    final status = device['status'] as String? ?? 'Unknown';
+                    final status = device['status'] as String? ?? 'Offline';
                     final colors =
-                        statusPalette[status] ?? statusPalette['Unknown']!;
+                        statusPalette[status] ?? statusPalette['Offline']!;
                     return Container(
                       margin: const EdgeInsets.only(right: 8),
                       padding: const EdgeInsets.symmetric(
@@ -356,7 +356,7 @@ class _DeviceStatusCardState extends State<_DeviceStatusCard> {
       final radius = isTouched ? 35.0 : 25.0;
       final status = entry.key;
       final count = entry.value;
-      final colors = statusPalette[status] ?? statusPalette['Unknown']!;
+      final colors = statusPalette[status] ?? statusPalette['Offline']!;
       final value = (count / widget.total) * 100;
 
       String title = '';

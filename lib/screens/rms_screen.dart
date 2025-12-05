@@ -35,27 +35,41 @@ class _RMSScreenState extends State<RMSScreen> {
 
   void _onSearchChanged() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
+
     _debounce = Timer(const Duration(milliseconds: 500), () {
       if (!mounted) return;
-      if (_searchController.text.isNotEmpty) {
-        setState(() => _isSearching = true);
-        ApiService.fetchPlants(searchQuery: _searchController.text)
-            .then((results) {
-          if (mounted) setState(() => _searchResults = results);
-        }).catchError((_) {
-          // Handle error if needed
-        }).whenComplete(() {
-          if (mounted) setState(() => _isSearching = false);
-        });
-      } else {
+
+      final query = _searchController.text.trim();
+      final selectedName = _selectedPlant?['plantName']?.toString().trim();
+
+      // 🔹 If box is empty → just hide results, keep selected plant + dashboard
+      if (query.isEmpty) {
         setState(() {
           _searchResults = [];
-          if (_selectedPlant != null) {
-            _selectedPlant = null;
-            _dashboardFuture = null;
-          }
         });
+        return;
       }
+
+      // 🔹 If text exactly equals the currently selected plant name
+      //    -> do NOT search again, and do NOT show dropdown.
+      if (selectedName != null && query == selectedName) {
+        setState(() {
+          _searchResults = [];
+        });
+        return;
+      }
+
+      // 🔹 Normal search flow
+      setState(() => _isSearching = true);
+      ApiService.fetchPlants(searchQuery: query).then((results) {
+        if (!mounted) return;
+        setState(() => _searchResults = results);
+      }).catchError((_) {
+        // handle error if needed
+      }).whenComplete(() {
+        if (!mounted) return;
+        setState(() => _isSearching = false);
+      });
     });
   }
 
@@ -86,9 +100,9 @@ class _RMSScreenState extends State<RMSScreen> {
                   style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 24),
               _buildSearchField(),
-              if (_isSearching) const LinearProgressIndicator(color: kPrimaryColor),
-              if (_searchResults.isNotEmpty)
-                _buildSearchResults(),
+              if (_isSearching)
+                const LinearProgressIndicator(color: kPrimaryColor),
+              if (_searchResults.isNotEmpty) _buildSearchResults(),
               Expanded(
                 child: SingleChildScrollView(
                   child: Padding(
@@ -112,8 +126,8 @@ class _RMSScreenState extends State<RMSScreen> {
         prefixIcon: const Icon(Icons.search),
         suffixIcon: _isSearching
             ? const Padding(
-            padding: EdgeInsets.all(12.0),
-            child: CircularProgressIndicator(strokeWidth: 2))
+                padding: EdgeInsets.all(12.0),
+                child: CircularProgressIndicator(strokeWidth: 2))
             : null,
       ),
     );
@@ -149,7 +163,8 @@ class _RMSScreenState extends State<RMSScreen> {
       future: future,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: kPrimaryColor));
+          return const Center(
+              child: CircularProgressIndicator(color: kPrimaryColor));
         }
         if (snapshot.hasError) {
           return Center(

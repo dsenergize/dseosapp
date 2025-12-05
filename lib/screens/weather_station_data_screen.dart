@@ -71,7 +71,7 @@ class _WeatherStationDataScreenState extends State<WeatherStationDataScreen> {
       'ambienttemperature': '°C',
       'moduletemperature': '°C',
       'humidity': '%',
-      'wind': 'm/s',
+      'wind': 'Km/h',
       'pyra': 'W/m²'
     },
     'Week': {},
