@@ -29,7 +29,7 @@ class RmsCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: iconBgColor.withOpacity(0.15),
+                color: iconBgColor.withValues(alpha: .15),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -50,12 +50,18 @@ class RmsCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 RichText(
                   text: TextSpan(
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: kTextColor),
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall
+                        ?.copyWith(color: kTextColor),
                     children: [
                       TextSpan(text: value),
                       TextSpan(
                         text: ' $unit',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kTextSecondaryColor),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(color: kTextSecondaryColor),
                       ),
                     ],
                   ),

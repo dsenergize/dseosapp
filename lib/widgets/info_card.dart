@@ -38,7 +38,7 @@ class InfoCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: iconBgColor.withOpacity(0.15),
+                color: iconBgColor.withValues(alpha: .15),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: iconBgColor, size: 28),
@@ -55,12 +55,18 @@ class InfoCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 RichText(
                   text: TextSpan(
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: kTextColor),
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall
+                        ?.copyWith(color: kTextColor),
                     children: [
                       TextSpan(text: displayValue),
                       TextSpan(
                         text: ' ${displayValue != 'N/A' ? unit : ''}',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kTextSecondaryColor),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(color: kTextSecondaryColor),
                       ),
                     ],
                   ),

@@ -3,7 +3,6 @@ import 'dart:developer' as developer;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../services/api_service.dart';
-import '../widgets/date_selector.dart';
 import '../theme.dart';
 import 'dart:math';
 
@@ -14,7 +13,8 @@ class InverterLevelDataScreen extends StatefulWidget {
   const InverterLevelDataScreen({super.key, required this.plant});
 
   @override
-  State<InverterLevelDataScreen> createState() => _InverterLevelDataScreenState();
+  State<InverterLevelDataScreen> createState() =>
+      _InverterLevelDataScreenState();
 }
 
 class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
@@ -33,9 +33,14 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
   final Map<String, Color> _seriesColorMap = {};
   int _colorIndex = 0;
   final List<Color> _modernChartColors = [
-    Colors.blue.shade500, Colors.red.shade500, Colors.green.shade500,
-    Colors.orange.shade500, Colors.purple.shade500, Colors.yellow.shade800,
-    Colors.teal.shade500, Colors.pink.shade500,
+    Colors.blue.shade500,
+    Colors.red.shade500,
+    Colors.green.shade500,
+    Colors.orange.shade500,
+    Colors.purple.shade500,
+    Colors.yellow.shade800,
+    Colors.teal.shade500,
+    Colors.pink.shade500,
   ];
 
   final Map<String, String> _metricDisplayNames = {
@@ -59,20 +64,42 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
   // Map to hold scaling factors for different metrics and ranges
   final Map<String, Map<String, double>> _scalingFactors = {
     'Day': {
-      'acpower': 0.001, 'dcpower': 0.001, 'dailyenergy': 0.1,
-      'lifetimeenergy': 0.001, 'temperature': 0.1, 'acfrequency': 0.01,
+      'acpower': 1.0,
+      'dcpower': 1.0,
+      'dailyenergy': 1.0,
+      'lifetimeenergy': 1.0,
+      'temperature': 1.0,
+      'acfrequency': 1.0,
     },
     'Week': {
-      'acpeakpower': 0.001, 'acpower': 0.001, 'dcpower': 0.001,
-      'production': 0.1, 'lifetimeenergy': 0.1, 'accuf': 1.0, 'dccuf': 1.0,
-      'efficiency': 1.0, 'pr': 1.0, 'temperature': 0.1,
-      'acfrequency': 0.01, 'pyra': 1.0, 'specificyield': 1.0,
+      'acpeakpower': 1.0,
+      'acpower': 1.0,
+      'dcpower': 1.0,
+      'production': 1.0,
+      'lifetimeenergy': 1.0,
+      'accuf': 1.0,
+      'dccuf': 1.0,
+      'efficiency': 1.0,
+      'pr': 1.0,
+      'temperature': 1.0,
+      'acfrequency': 1.0,
+      'pyra': 1.0,
+      'specificyield': 1.0,
     },
     'Month': {
-      'monthlyenergy': 1.0, 'acpeakpower': 0.001, 'acpower': 0.001,
-      'dcpower': 0.001, 'acfrequency': 0.01, 'accuf': 1.0, 'dccuf': 1.0,
-      'efficiency': 1.0, 'specificyield': 1.0, 'lifetimeenergy': 1.0,
-      'temperature': 0.1, 'pr': 1.0, 'pyra': 1.0,
+      'monthlyenergy': 1.0,
+      'acpeakpower': 1.0,
+      'acpower': 1.0,
+      'dcpower': 1.0,
+      'acfrequency': 1.0,
+      'accuf': 1.0,
+      'dccuf': 1.0,
+      'efficiency': 1.0,
+      'specificyield': 1.0,
+      'lifetimeenergy': 1.0,
+      'temperature': 1.0,
+      'pr': 1.0,
+      'pyra': 1.0,
     },
     'Year': {},
   };
@@ -80,20 +107,42 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
   // Map to hold units for different metrics and ranges
   final Map<String, Map<String, String>> _units = {
     'Day': {
-      'acpower': 'kW', 'dcpower': 'kW', 'dailyenergy': 'kWh',
-      'lifetimeenergy': 'kWh', 'temperature': '°C', 'acfrequency': 'Hz',
+      'acpower': 'kW',
+      'dcpower': 'kW',
+      'dailyenergy': 'kWh',
+      'lifetimeenergy': 'kWh',
+      'temperature': '°C',
+      'acfrequency': 'Hz',
     },
     'Week': {
-      'acpeakpower': 'kW', 'acpower': 'kW', 'dcpower': 'kW',
-      'production': 'kWh', 'lifetimeenergy': 'kWh', 'accuf': '%', 'dccuf': '%',
-      'efficiency': '%', 'pr': '%', 'temperature': '°C', 'acfrequency': 'Hz',
-      'pyra': 'W/m²', 'specificyield': 'kWh/kWp',
+      'acpeakpower': 'kW',
+      'acpower': 'kW',
+      'dcpower': 'kW',
+      'production': 'kWh',
+      'lifetimeenergy': 'kWh',
+      'accuf': '%',
+      'dccuf': '%',
+      'efficiency': '%',
+      'pr': '%',
+      'temperature': '°C',
+      'acfrequency': 'Hz',
+      'pyra': 'W/m²',
+      'specificyield': 'kWh/kWp',
     },
     'Month': {
-      'monthlyenergy': 'kWh', 'acpeakpower': 'kW', 'acpower': 'kW',
-      'dcpower': 'kW', 'acfrequency': 'Hz', 'accuf': '%', 'dccuf': '%',
-      'efficiency': '%', 'specificyield': 'kWh/kWp', 'lifetimeenergy': 'kWh',
-      'temperature': '°C', 'pr': '%', 'pyra': 'W/m²',
+      'monthlyenergy': 'kWh',
+      'acpeakpower': 'kW',
+      'acpower': 'kW',
+      'dcpower': 'kW',
+      'acfrequency': 'Hz',
+      'accuf': '%',
+      'dccuf': '%',
+      'efficiency': '%',
+      'specificyield': 'kWh/kWp',
+      'lifetimeenergy': 'kWh',
+      'temperature': '°C',
+      'pr': '%',
+      'pyra': 'W/m²',
     },
     'Year': {},
   };
@@ -107,18 +156,28 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
   // --- DATA FLOW ---
 
   Future<Map<String, dynamic>> _fetchApiData() {
-    developer.log("Fetching Inverter Data for range: $_selectedRange", name: "InverterScreen.API");
+    developer.log("Fetching Inverter Data for range: $_selectedRange",
+        name: "InverterScreen.API");
     switch (_selectedRange) {
-      case 'Day': return ApiService.getInverterDayData(widget.plant['id'], _selectedDate);
-      case 'Week': return ApiService.getInverterDailyReport(widget.plant['id'], _selectedDate);
-      case 'Month': return ApiService.getInverterMonthlyReport(widget.plant['id'], _selectedDate);
-      case 'Year': return ApiService.getInverterYearlyReport(widget.plant['id'], _selectedDate);
-      default: return Future.value({});
+      case 'Day':
+        return ApiService.getInverterDayData(widget.plant['id'], _selectedDate);
+      case 'Week':
+        return ApiService.getInverterDailyReport(
+            widget.plant['id'], _selectedDate);
+      case 'Month':
+        return ApiService.getInverterMonthlyReport(
+            widget.plant['id'], _selectedDate);
+      case 'Year':
+        return ApiService.getInverterYearlyReport(
+            widget.plant['id'], _selectedDate);
+      default:
+        return Future.value({});
     }
   }
 
   void _processSnapshotData(Map<String, dynamic> data) {
-    developer.log('Processing snapshot data for inverters', name: 'InverterScreen.DataFlow');
+    developer.log('Processing snapshot data for inverters',
+        name: 'InverterScreen.DataFlow');
     _fullApiResponse = data;
 
     List<Map<String, dynamic>> invertersList = [];
@@ -136,31 +195,44 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
 
     _fullApiResponse!['inverters'] = invertersList;
 
-    _availableInverters = invertersList.map((inv) => inv['inverterName'] as String?).where((name) => name != null && name.isNotEmpty).cast<String>().toSet().toList();
-    developer.log('Available inverters found: $_availableInverters', name: 'InverterScreen.DataFlow');
+    _availableInverters = invertersList
+        .map((inv) => inv['inverterName'] as String?)
+        .where((name) => name != null && name.isNotEmpty)
+        .cast<String>()
+        .toSet()
+        .toList();
+    developer.log('Available inverters found: $_availableInverters',
+        name: 'InverterScreen.DataFlow');
 
     for (final inverterName in _availableInverters) {
       _getColorForSeries(inverterName);
     }
 
-    if (_availableInverters.isNotEmpty && (_selectedInverter == null || !_availableInverters.contains(_selectedInverter))) {
+    if (_availableInverters.isNotEmpty &&
+        (_selectedInverter == null ||
+            !_availableInverters.contains(_selectedInverter))) {
       _selectedInverter = _availableInverters.first;
-      developer.log('Auto-selecting first inverter: $_selectedInverter', name: 'InverterScreen.DataFlow');
+      developer.log('Auto-selecting first inverter: $_selectedInverter',
+          name: 'InverterScreen.DataFlow');
     }
 
     _updateAvailableMetricFilters();
   }
 
-  void _updateAvailableMetricFilters({ bool inverterChanged = false }) {
+  void _updateAvailableMetricFilters({bool inverterChanged = false}) {
     if (_selectedInverter == null || _fullApiResponse == null) {
       _availableDataFilters = [];
       _selectedDataFilters = {};
       return;
     }
-    developer.log('Updating metric filters for: $_selectedInverter', name: 'InverterScreen.DataFlow');
+    developer.log('Updating metric filters for: $_selectedInverter',
+        name: 'InverterScreen.DataFlow');
 
-    final invertersList = (_fullApiResponse!['inverters'] as List).cast<Map<String, dynamic>>();
-    final inverterData = invertersList.firstWhere((inv) => inv['inverterName'] == _selectedInverter, orElse: () => <String, dynamic>{});
+    final invertersList =
+        (_fullApiResponse!['inverters'] as List).cast<Map<String, dynamic>>();
+    final inverterData = invertersList.firstWhere(
+        (inv) => inv['inverterName'] == _selectedInverter,
+        orElse: () => <String, dynamic>{});
 
     final filters = <String>{};
     for (var key in inverterData.keys) {
@@ -170,17 +242,22 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
     }
     filters.remove('inverterName');
     _availableDataFilters = filters.toList()..sort();
-    developer.log('Available metrics for $_selectedInverter: $_availableDataFilters', name: 'InverterScreen.DataFlow');
+    developer.log(
+        'Available metrics for $_selectedInverter: $_availableDataFilters',
+        name: 'InverterScreen.DataFlow');
 
     if (inverterChanged) {
-      _selectedDataFilters = _availableDataFilters.isNotEmpty ? {_availableDataFilters.first} : {};
+      _selectedDataFilters =
+          _availableDataFilters.isNotEmpty ? {_availableDataFilters.first} : {};
     } else {
-      _selectedDataFilters.removeWhere((f) => !_availableDataFilters.contains(f));
+      _selectedDataFilters
+          .removeWhere((f) => !_availableDataFilters.contains(f));
       if (_selectedDataFilters.isEmpty && _availableDataFilters.isNotEmpty) {
         _selectedDataFilters = {_availableDataFilters.first};
       }
     }
-    developer.log('Selected metrics updated to: $_selectedDataFilters', name: 'InverterScreen.DataFlow');
+    developer.log('Selected metrics updated to: $_selectedDataFilters',
+        name: 'InverterScreen.DataFlow');
   }
 
   void _clearAllState() {
@@ -193,7 +270,8 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
 
   Color _getColorForSeries(String seriesKey) {
     if (!_seriesColorMap.containsKey(seriesKey)) {
-      _seriesColorMap[seriesKey] = _modernChartColors[_colorIndex % _modernChartColors.length];
+      _seriesColorMap[seriesKey] =
+          _modernChartColors[_colorIndex % _modernChartColors.length];
       _colorIndex++;
     }
     return _seriesColorMap[seriesKey]!;
@@ -227,8 +305,10 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
 
   void _onDataFilterSelectionChanged(String filterKey, bool isSelected) {
     setState(() {
-      if (isSelected) _selectedDataFilters.add(filterKey);
-      else _selectedDataFilters.remove(filterKey);
+      if (isSelected)
+        _selectedDataFilters.add(filterKey);
+      else
+        _selectedDataFilters.remove(filterKey);
     });
   }
 
@@ -255,7 +335,8 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
       initialDate: _selectedDate,
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
-      initialDatePickerMode: _selectedRange == 'Year' ? DatePickerMode.year : DatePickerMode.day,
+      initialDatePickerMode:
+          _selectedRange == 'Year' ? DatePickerMode.year : DatePickerMode.day,
       builder: (context, child) {
         return Center(
           child: ConstrainedBox(
@@ -278,7 +359,9 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text("Inverter Level Data", style: TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold)),
+        title: const Text("Inverter Level Data",
+            style:
+                TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         elevation: 1,
         iconTheme: const IconThemeData(color: kPrimaryColor),
@@ -290,8 +373,11 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
             child: FutureBuilder<Map<String, dynamic>>(
               future: _dataFetchFuture,
               builder: (context, snapshot) {
-                final bool isLoading = snapshot.connectionState == ConnectionState.waiting;
-                final bool hasError = snapshot.hasError || !snapshot.hasData || (snapshot.data?.isEmpty ?? true);
+                final bool isLoading =
+                    snapshot.connectionState == ConnectionState.waiting;
+                final bool hasError = snapshot.hasError ||
+                    !snapshot.hasData ||
+                    (snapshot.data?.isEmpty ?? true);
 
                 if (!isLoading && !hasError && _fullApiResponse == null) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -304,22 +390,26 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
                 }
 
                 if (isLoading || (_fullApiResponse == null && !hasError)) {
-                  return const Center(child: CircularProgressIndicator(color: kPrimaryColor));
+                  return const Center(
+                      child: CircularProgressIndicator(color: kPrimaryColor));
                 }
 
                 if (hasError) {
                   return _buildEmptyState(
                       icon: Icons.error_outline,
                       title: 'Could not fetch data',
-                      message: 'Please check your connection and try again.'
-                  );
+                      message: 'Please check your connection and try again.');
                 }
 
-                final inverterData = (_selectedInverter != null && _fullApiResponse != null && (_fullApiResponse!['inverters'] as List).isNotEmpty)
-                    ? (_fullApiResponse!['inverters'] as List).cast<Map<String, dynamic>>().firstWhere(
-                      (inv) => inv['inverterName'] == _selectedInverter,
-                  orElse: () => {},
-                )
+                final inverterData = (_selectedInverter != null &&
+                        _fullApiResponse != null &&
+                        (_fullApiResponse!['inverters'] as List).isNotEmpty)
+                    ? (_fullApiResponse!['inverters'] as List)
+                        .cast<Map<String, dynamic>>()
+                        .firstWhere(
+                          (inv) => inv['inverterName'] == _selectedInverter,
+                          orElse: () => {},
+                        )
                     : null;
 
                 return Column(
@@ -327,30 +417,39 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
                     _buildMetricFilterBar(),
                     Expanded(
                       child: Builder(builder: (context) {
-                        if (inverterData == null || _selectedDataFilters.isEmpty) {
+                        if (inverterData == null ||
+                            _selectedDataFilters.isEmpty) {
                           return _buildEmptyState(
                               icon: Icons.analytics_outlined,
                               title: 'No Data to Display',
-                              message: 'Select an inverter and at least one metric.'
-                          );
+                              message:
+                                  'Select an inverter and at least one metric.');
                         }
                         return ListView(
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                           children: _selectedDataFilters.map((filterKey) {
-                            final seriesData = (inverterData[filterKey] as List?)?.cast<Map<String, dynamic>>();
-                            if(seriesData == null || seriesData.isEmpty) return const SizedBox.shrink();
+                            final seriesData =
+                                (inverterData[filterKey] as List?)
+                                    ?.cast<Map<String, dynamic>>();
+                            if (seriesData == null || seriesData.isEmpty)
+                              return const SizedBox.shrink();
 
                             ChartType chartType = ChartType.line;
                             String keyLower = filterKey.toLowerCase();
 
-                            if (_selectedRange == 'Week' && (keyLower == 'dailyenergy' || keyLower == 'lifetimeenergy')) {
+                            if (_selectedRange == 'Week' &&
+                                (keyLower == 'dailyenergy' ||
+                                    keyLower == 'lifetimeenergy')) {
                               chartType = ChartType.bar;
-                            } else if (_selectedRange == 'Month' && (keyLower == 'monthlyenergy' || keyLower == 'lifetimeenergy')) {
+                            } else if (_selectedRange == 'Month' &&
+                                (keyLower == 'monthlyenergy' ||
+                                    keyLower == 'lifetimeenergy')) {
                               chartType = ChartType.bar;
                             }
 
                             return _SingleMetricChart(
-                              title: _metricDisplayNames[filterKey] ?? filterKey,
+                              title:
+                                  _metricDisplayNames[filterKey] ?? filterKey,
                               seriesData: seriesData,
                               color: _getColorForSeries(filterKey),
                               range: _selectedRange,
@@ -385,7 +484,11 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
           const SizedBox(height: 24),
           const Align(
             alignment: Alignment.centerLeft,
-            child: Text('Inverters', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: kTextSecondaryColor)),
+            child: Text('Inverters',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: kTextSecondaryColor)),
           ),
           const SizedBox(height: 8),
           _buildInverterGridSelector(),
@@ -398,7 +501,8 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
     final List<String> ranges = ['Day', 'Week', 'Month', 'Year'];
     return Container(
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey.shade300, width: 1)),
+        border:
+            Border(bottom: BorderSide(color: Colors.grey.shade300, width: 1)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -415,7 +519,8 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
                       range,
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.w500,
                         color: isSelected ? kPrimaryColor : kTextSecondaryColor,
                       ),
                     ),
@@ -449,9 +554,12 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
             if (_selectedRange == 'Day') {
               newDate = _selectedDate.subtract(const Duration(days: 1));
             } else if (_selectedRange == 'Week' || _selectedRange == 'Month') {
-              newDate = DateTime(_selectedDate.year, _selectedDate.month - 1, _selectedDate.day);
-            } else { // Year
-              newDate = DateTime(_selectedDate.year - 1, _selectedDate.month, _selectedDate.day);
+              newDate = DateTime(_selectedDate.year, _selectedDate.month - 1,
+                  _selectedDate.day);
+            } else {
+              // Year
+              newDate = DateTime(_selectedDate.year - 1, _selectedDate.month,
+                  _selectedDate.day);
             }
             _onDateSelected(newDate);
           },
@@ -462,12 +570,14 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
             children: [
               Text(
                 _getDateNavigatorTitle(),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               if (_selectedRange != 'Year')
                 Text(
                   DateFormat('yyyy').format(_selectedDate),
-                  style: const TextStyle(fontSize: 14, color: kTextSecondaryColor),
+                  style:
+                      const TextStyle(fontSize: 14, color: kTextSecondaryColor),
                 ),
             ],
           ),
@@ -479,9 +589,12 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
             if (_selectedRange == 'Day') {
               newDate = _selectedDate.add(const Duration(days: 1));
             } else if (_selectedRange == 'Week' || _selectedRange == 'Month') {
-              newDate = DateTime(_selectedDate.year, _selectedDate.month + 1, _selectedDate.day);
-            } else { // Year
-              newDate = DateTime(_selectedDate.year + 1, _selectedDate.month, _selectedDate.day);
+              newDate = DateTime(_selectedDate.year, _selectedDate.month + 1,
+                  _selectedDate.day);
+            } else {
+              // Year
+              newDate = DateTime(_selectedDate.year + 1, _selectedDate.month,
+                  _selectedDate.day);
             }
             _onDateSelected(newDate);
           },
@@ -506,10 +619,16 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
 
   Widget _buildInverterGridSelector() {
     if (_fullApiResponse == null) {
-      return const Center(heightFactor: 2, child: Text("Loading Inverters...", style: TextStyle(color: kTextSecondaryColor)));
+      return const Center(
+          heightFactor: 2,
+          child: Text("Loading Inverters...",
+              style: TextStyle(color: kTextSecondaryColor)));
     }
     if (_availableInverters.isEmpty) {
-      return const Center(heightFactor: 2, child: Text("No Inverters Found", style: TextStyle(color: kTextSecondaryColor)));
+      return const Center(
+          heightFactor: 2,
+          child: Text("No Inverters Found",
+              style: TextStyle(color: kTextSecondaryColor)));
     }
 
     return SizedBox(
@@ -526,9 +645,10 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
               onTap: () => _onInverterSelected(inverterName),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? color : color.withOpacity(0.1),
+                  color: isSelected ? color : color.withValues(alpha: .1),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isSelected ? color : Colors.transparent,
@@ -558,7 +678,11 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Metrics', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: kTextSecondaryColor)),
+          const Text('Metrics',
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: kTextSecondaryColor)),
           const SizedBox(height: 8),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -570,12 +694,18 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
                 return FilterChip(
                   label: Text(_metricDisplayNames[filterKey] ?? filterKey),
                   selected: isSelected,
-                  onSelected: (bool val) => _onDataFilterSelectionChanged(filterKey, val),
-                  backgroundColor: Colors.white, selectedColor: color.withOpacity(0.1),
-                  checkmarkColor: color, shape: StadiumBorder(side: BorderSide(color: isSelected ? color : Colors.grey.shade300)),
+                  onSelected: (bool val) =>
+                      _onDataFilterSelectionChanged(filterKey, val),
+                  backgroundColor: Colors.white,
+                  selectedColor: color.withValues(alpha: .1),
+                  checkmarkColor: color,
+                  shape: StadiumBorder(
+                      side: BorderSide(
+                          color: isSelected ? color : Colors.grey.shade300)),
                   labelStyle: TextStyle(
                     color: isSelected ? color : Colors.black87,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
                 );
               }).toList(),
@@ -586,14 +716,21 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
     );
   }
 
-  Widget _buildEmptyState({required IconData icon, required String title, required String message}) {
+  Widget _buildEmptyState(
+      {required IconData icon,
+      required String title,
+      required String message}) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, size: 48, color: Colors.grey.shade400),
           const SizedBox(height: 16),
-          Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: kTextSecondaryColor)),
+          Text(title,
+              style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: kTextSecondaryColor)),
           const SizedBox(height: 4),
           Text(message, style: const TextStyle(color: kTextSecondaryColor)),
         ],
@@ -601,7 +738,6 @@ class _InverterLevelDataScreenState extends State<InverterLevelDataScreen> {
     );
   }
 }
-
 
 // A private widget to render a single chart for a given metric.
 class _SingleMetricChart extends StatelessWidget {
@@ -628,7 +764,7 @@ class _SingleMetricChart extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 16.0),
       elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
+      shadowColor: Colors.black.withValues(alpha: .1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SizedBox(
         height: 280,
@@ -637,12 +773,17 @@ class _SingleMetricChart extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              child: Text(title,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(right: 24.0, bottom: 12.0, left: 12.0),
-                child: chartType == ChartType.bar ? _buildBarChart(context) : _buildLineChart(context),
+                padding: const EdgeInsets.only(
+                    right: 24.0, bottom: 12.0, left: 12.0),
+                child: chartType == ChartType.bar
+                    ? _buildBarChart(context)
+                    : _buildLineChart(context),
               ),
             ),
           ],
@@ -652,7 +793,10 @@ class _SingleMetricChart extends StatelessWidget {
   }
 
   Widget _buildLineChart(BuildContext context) {
-    final String xAxisKey = seriesData.isNotEmpty && seriesData.first.containsKey('date') ? 'date' : 'time';
+    final String xAxisKey =
+        seriesData.isNotEmpty && seriesData.first.containsKey('date')
+            ? 'date'
+            : 'time';
     double maxY = 0;
     final spots = seriesData.asMap().entries.map((entry) {
       final value = ((entry.value['value'] as num?)?.toDouble() ?? 0.0) * scale;
@@ -675,8 +819,8 @@ class _SingleMetricChart extends StatelessWidget {
               show: true,
               gradient: LinearGradient(
                 colors: [
-                  color.withOpacity(0.3),
-                  color.withOpacity(0.0),
+                  color.withValues(alpha: .3),
+                  color.withValues(alpha: .0),
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -684,7 +828,11 @@ class _SingleMetricChart extends StatelessWidget {
             ),
           ),
         ],
-        gridData: FlGridData(show: true, drawVerticalLine: false, getDrawingHorizontalLine: (value) => const FlLine(color: Color(0xffe7e8ec), strokeWidth: 1)),
+        gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            getDrawingHorizontalLine: (value) =>
+                const FlLine(color: Color(0xffe7e8ec), strokeWidth: 1)),
         borderData: FlBorderData(show: false),
         titlesData: _buildTitlesData(xAxisKey),
         lineTouchData: _buildLineTouchData(xAxisKey),
@@ -693,7 +841,10 @@ class _SingleMetricChart extends StatelessWidget {
   }
 
   Widget _buildBarChart(BuildContext context) {
-    final String xAxisKey = seriesData.isNotEmpty && seriesData.first.containsKey('date') ? 'date' : 'time';
+    final String xAxisKey =
+        seriesData.isNotEmpty && seriesData.first.containsKey('date')
+            ? 'date'
+            : 'time';
     double maxY = 0;
     final barGroups = seriesData.asMap().entries.map((entry) {
       final value = ((entry.value['value'] as num?)?.toDouble() ?? 0.0) * scale;
@@ -703,15 +854,14 @@ class _SingleMetricChart extends StatelessWidget {
             toY: value,
             gradient: LinearGradient(
               colors: [
-                color.withOpacity(0.8),
+                color.withValues(alpha: .8),
                 color,
               ],
               begin: Alignment.bottomCenter,
               end: Alignment.topCenter,
             ),
             width: 16,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(4))
-        ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(4))),
       ]);
     }).toList();
 
@@ -719,7 +869,11 @@ class _SingleMetricChart extends StatelessWidget {
       BarChartData(
         maxY: maxY > 0 ? maxY * 1.2 : 10,
         barGroups: barGroups,
-        gridData: FlGridData(show: true, drawVerticalLine: false, getDrawingHorizontalLine: (value) => const FlLine(color: Color(0xffe7e8ec), strokeWidth: 1)),
+        gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            getDrawingHorizontalLine: (value) =>
+                const FlLine(color: Color(0xffe7e8ec), strokeWidth: 1)),
         borderData: FlBorderData(show: false),
         titlesData: _buildTitlesData(xAxisKey),
         barTouchData: _buildBarTouchData(xAxisKey),
@@ -732,10 +886,17 @@ class _SingleMetricChart extends StatelessWidget {
       show: true,
       topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-      leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 50, getTitlesWidget: (value, meta) {
-        if (value == meta.max || value == meta.min) return const SizedBox();
-        return Text(NumberFormat.compact().format(value), style: const TextStyle(color: kTextSecondaryColor, fontSize: 12));
-      })),
+      leftTitles: AxisTitles(
+          sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 50,
+              getTitlesWidget: (value, meta) {
+                if (value == meta.max || value == meta.min)
+                  return const SizedBox();
+                return Text(NumberFormat.compact().format(value),
+                    style: const TextStyle(
+                        color: kTextSecondaryColor, fontSize: 12));
+              })),
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
           showTitles: true,
@@ -744,7 +905,12 @@ class _SingleMetricChart extends StatelessWidget {
           getTitlesWidget: (value, meta) {
             final index = value.toInt();
             if (index >= 0 && index < seriesData.length) {
-              return SideTitleWidget(axisSide: meta.axisSide, space: 8, child: Text(seriesData[index][xAxisKey]?.toString() ?? '', style: const TextStyle(color: kTextSecondaryColor, fontSize: 12)));
+              return SideTitleWidget(
+                  axisSide: meta.axisSide,
+                  space: 8,
+                  child: Text(seriesData[index][xAxisKey]?.toString() ?? '',
+                      style: const TextStyle(
+                          color: kTextSecondaryColor, fontSize: 12)));
             }
             return const Text('');
           },
@@ -757,18 +923,22 @@ class _SingleMetricChart extends StatelessWidget {
     return LineTouchData(
       touchTooltipData: LineTouchTooltipData(
         tooltipRoundedRadius: 8,
-        getTooltipColor: (spot) => Colors.black.withOpacity(0.8),
+        getTooltipColor: (spot) => Colors.black.withValues(alpha: .8),
         getTooltipItems: (touchedSpots) {
           return touchedSpots.map((spot) {
             final index = spot.x.toInt();
             final item = seriesData[index];
             final scaledValue = spot.y;
             final String label = item[xAxisKey]?.toString() ?? '';
-            final String displayLabel = xAxisKey == 'time' ? 'Time-$label' : label;
+            final String displayLabel =
+                xAxisKey == 'time' ? 'Time-$label' : label;
 
             return LineTooltipItem(
               '$displayLabel\n',
-              const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+              const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500),
               children: [
                 TextSpan(
                   text: scaledValue.toStringAsFixed(2),
@@ -781,7 +951,7 @@ class _SingleMetricChart extends StatelessWidget {
                 TextSpan(
                   text: ' $unit',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: .8),
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -798,15 +968,19 @@ class _SingleMetricChart extends StatelessWidget {
     return BarTouchData(
       touchTooltipData: BarTouchTooltipData(
         tooltipRoundedRadius: 8,
-        getTooltipColor: (group) => Colors.black.withOpacity(0.8),
+        getTooltipColor: (group) => Colors.black.withValues(alpha: .8),
         getTooltipItem: (group, groupIndex, rod, rodIndex) {
           final item = seriesData[groupIndex];
           final scaledValue = rod.toY;
           final String label = item[xAxisKey]?.toString() ?? '';
-          final String displayLabel = xAxisKey == 'time' ? 'time-$label' : label;
+          final String displayLabel =
+              xAxisKey == 'time' ? 'time-$label' : label;
           return BarTooltipItem(
               '$displayLabel\n',
-              const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+              const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500),
               children: [
                 TextSpan(
                   text: scaledValue.toStringAsFixed(2),
@@ -819,13 +993,12 @@ class _SingleMetricChart extends StatelessWidget {
                 TextSpan(
                   text: ' $unit',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: .8),
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-              ]
-          );
+              ]);
         },
       ),
     );

@@ -36,7 +36,8 @@ class _PlantCardState extends State<PlantCard> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.wb_sunny_outlined, size: 32, color: kPrimaryColor),
+                  const Icon(Icons.wb_sunny_outlined,
+                      size: 32, color: kPrimaryColor),
                   SizedBox(
                     width: 24,
                     height: 24,
@@ -47,7 +48,7 @@ class _PlantCardState extends State<PlantCard> {
                           _isToggled = value;
                         });
                       },
-                      activeColor: kPrimaryColor,
+                      activeThumbColor: kPrimaryColor,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                   )

@@ -2,7 +2,6 @@ import 'package:dseos/screens/plant_list_screen.dart';
 import 'package:dseos/screens/profile_screen.dart';
 import 'package:dseos/screens/rms_screen.dart';
 import 'package:flutter/material.dart';
-import '../theme.dart';
 import 'alerts_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -64,4 +63,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-

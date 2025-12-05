@@ -44,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const LoginScreen()),
-          (route) => false,
+      (route) => false,
     );
   }
 
@@ -91,7 +91,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator(color: kPrimaryColor));
+      return const Center(
+          child: CircularProgressIndicator(color: kPrimaryColor));
     }
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -99,47 +100,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: _user == null
             ? const Center(child: Text('No user found'))
             : ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            _buildProfileCard(),
-            const SizedBox(height: 30),
-            _buildActionButton(
-              label: 'Edit Profile',
-              onTap: () async {
-                final updatedUser = await Navigator.push<UserModel>(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => EditProfileScreen(user: _user!)),
-                );
-                if (updatedUser != null) {
-                  setState(() => _user = updatedUser);
-                }
-              },
-              backgroundColor: kPrimaryColor.withOpacity(0.1),
-              textColor: kPrimaryColor,
-            ),
-            const SizedBox(height: 16),
-            _buildActionButton(
-              label: 'Change Password',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const ChangePasswordScreen()),
-                );
-              },
-              backgroundColor: kPrimaryColor.withOpacity(0.1),
-              textColor: kPrimaryColor,
-            ),
-            const SizedBox(height: 16),
-            _buildActionButton(
-              label: 'Logout',
-              onTap: _logout,
-              backgroundColor: Colors.red.withOpacity(0.1),
-              textColor: Colors.red,
-            ),
-          ],
-        ),
+                padding: const EdgeInsets.all(16),
+                children: [
+                  _buildProfileCard(),
+                  const SizedBox(height: 30),
+                  _buildActionButton(
+                    label: 'Edit Profile',
+                    onTap: () async {
+                      final updatedUser = await Navigator.push<UserModel>(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => EditProfileScreen(user: _user!)),
+                      );
+                      if (updatedUser != null) {
+                        setState(() => _user = updatedUser);
+                      }
+                    },
+                    backgroundColor: kPrimaryColor.withValues(alpha: .1),
+                    textColor: kPrimaryColor,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildActionButton(
+                    label: 'Change Password',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const ChangePasswordScreen()),
+                      );
+                    },
+                    backgroundColor: kPrimaryColor.withValues(alpha: .1),
+                    textColor: kPrimaryColor,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildActionButton(
+                    label: 'Logout',
+                    onTap: _logout,
+                    backgroundColor: Colors.red.withValues(alpha: .1),
+                    textColor: Colors.red,
+                  ),
+                ],
+              ),
       ),
     );
   }
@@ -234,7 +235,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 padding: const EdgeInsets.only(top: 12.0),
                 child: Chip(
                   label: const Text('Admin'),
-                  backgroundColor: kPrimaryColor.withOpacity(0.1),
+                  backgroundColor: kPrimaryColor.withValues(alpha: .1),
                   labelStyle: const TextStyle(
                       color: kPrimaryColor, fontWeight: FontWeight.bold),
                   side: BorderSide.none,

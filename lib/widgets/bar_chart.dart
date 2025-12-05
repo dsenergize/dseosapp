@@ -51,7 +51,7 @@ class _BarChartWidgetState extends State<BarChartWidget> {
                       drawVerticalLine: false,
                       // Ensure interval is never zero
                       horizontalInterval:
-                      (_getMaxYValue() / 5).clamp(1, double.infinity),
+                          (_getMaxYValue() / 5).clamp(1, double.infinity),
                       getDrawingHorizontalLine: (value) => const FlLine(
                         color: Color(0xffe7e8ec),
                         strokeWidth: 1,
@@ -139,7 +139,7 @@ class _BarChartWidgetState extends State<BarChartWidget> {
           getTitlesWidget: (value, meta) {
             // Check if the max value is not 0 to avoid division by zero
             final interval =
-            _getMaxYValue() > 0 ? (_getMaxYValue() / 5).round() : 20;
+                _getMaxYValue() > 0 ? (_getMaxYValue() / 5).round() : 20;
             if (value % interval == 0) {
               return Text(
                 NumberFormat.compact().format(value),
@@ -242,7 +242,7 @@ class _BarChartWidgetState extends State<BarChartWidget> {
             height: 12,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isVisible ? color : color.withOpacity(0.3),
+              color: isVisible ? color : color.withValues(alpha: .3),
             ),
           ),
           const SizedBox(width: 8),

@@ -3,7 +3,6 @@ import 'dart:developer' as developer;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../services/api_service.dart';
-import '../widgets/date_selector.dart';
 import '../theme.dart';
 import 'dart:math';
 
@@ -33,9 +32,14 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
   final Map<String, Color> _seriesColorMap = {};
   int _colorIndex = 0;
   final List<Color> _modernChartColors = [
-    Colors.cyan.shade500, Colors.deepPurple.shade500, Colors.green.shade500,
-    Colors.amber.shade700, Colors.pink.shade400, Colors.indigo.shade500,
-    Colors.lime.shade600, Colors.blueGrey.shade500,
+    Colors.cyan.shade500,
+    Colors.deepPurple.shade500,
+    Colors.green.shade500,
+    Colors.amber.shade700,
+    Colors.pink.shade400,
+    Colors.indigo.shade500,
+    Colors.lime.shade600,
+    Colors.blueGrey.shade500,
   ];
 
   final Map<String, String> _metricDisplayNames = {
@@ -67,22 +71,24 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
       'reactivepower': 1.0,
       'apparentpower': 1.0,
       'lifetimeenergyexport': 1.0,
-      'avglinetolinevoltage': 0.001,
-      'avglinetoneutralvoltage': 0.001,
-      'voltagerphase': 0.001,
-      'voltageyphase': 0.001,
-      'voltagebphase': 0.001,
-      'voltagery': 0.001,
-      'voltageyb': 0.001,
-      'voltagebr': 0.001,
+      'avglinetolinevoltage': 1.0,
+      'avglinetoneutralvoltage': 1.0,
+      'voltagerphase': 1.0,
+      'voltageyphase': 1.0,
+      'voltagebphase': 1.0,
+      'voltagery': 1.0,
+      'voltageyb': 1.0,
+      'voltagebr': 1.0,
       'currentrphase': 1.0,
       'currentyphase': 1.0,
       'currentbphase': 1.0,
       'totallinecurrent': 1.0,
-      'frequency': 0.01,
-      'powerfactor': 0.001,
+      'frequency': 1.0,
+      'powerfactor': 1.0,
     },
-    'Week': {}, 'Month': {}, 'Year': {},
+    'Week': {},
+    'Month': {},
+    'Year': {},
   };
 
   final Map<String, Map<String, String>> _units = {
@@ -106,7 +112,9 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
       'frequency': 'Hz',
       'powerfactor': '',
     },
-    'Week': {}, 'Month': {}, 'Year': {},
+    'Week': {},
+    'Month': {},
+    'Year': {},
   };
 
   @override
@@ -118,13 +126,22 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
   // --- DATA FLOW ---
 
   Future<Map<String, dynamic>> _fetchApiData() {
-    developer.log("Fetching Meter Data for range: $_selectedRange", name: "MeterScreen.API");
+    developer.log("Fetching Meter Data for range: $_selectedRange",
+        name: "MeterScreen.API");
     switch (_selectedRange) {
-      case 'Day': return ApiService.getMeterDayData(widget.plant['id'], _selectedDate);
-      case 'Week': return ApiService.getMeterDailyReport(widget.plant['id'], _selectedDate);
-      case 'Month': return ApiService.getMeterMonthlyReport(widget.plant['id'], _selectedDate);
-      case 'Year': return ApiService.getMeterMonthlyReport(widget.plant['id'], _selectedDate);
-      default: return Future.value({});
+      case 'Day':
+        return ApiService.getMeterDayData(widget.plant['id'], _selectedDate);
+      case 'Week':
+        return ApiService.getMeterDailyReport(
+            widget.plant['id'], _selectedDate);
+      case 'Month':
+        return ApiService.getMeterMonthlyReport(
+            widget.plant['id'], _selectedDate);
+      case 'Year':
+        return ApiService.getMeterMonthlyReport(
+            widget.plant['id'], _selectedDate);
+      default:
+        return Future.value({});
     }
   }
 
@@ -148,31 +165,44 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
 
     _fullApiResponse!['meters'] = metersList;
 
-    _availableMeters = metersList.map((meter) => meter['meterName'] as String?).where((name) => name != null && name.isNotEmpty).cast<String>().toSet().toList();
-    developer.log('Available meters found: $_availableMeters', name: 'MeterScreen.DataFlow');
+    _availableMeters = metersList
+        .map((meter) => meter['meterName'] as String?)
+        .where((name) => name != null && name.isNotEmpty)
+        .cast<String>()
+        .toSet()
+        .toList();
+    developer.log('Available meters found: $_availableMeters',
+        name: 'MeterScreen.DataFlow');
 
     for (final meterName in _availableMeters) {
       _getColorForSeries(meterName);
     }
 
-    if (_availableMeters.isNotEmpty && (_selectedMeter == null || !_availableMeters.contains(_selectedMeter))) {
+    if (_availableMeters.isNotEmpty &&
+        (_selectedMeter == null ||
+            !_availableMeters.contains(_selectedMeter))) {
       _selectedMeter = _availableMeters.first;
-      developer.log('Auto-selecting first meter: $_selectedMeter', name: 'MeterScreen.DataFlow');
+      developer.log('Auto-selecting first meter: $_selectedMeter',
+          name: 'MeterScreen.DataFlow');
     }
 
     _updateAvailableMetricFilters();
   }
 
-  void _updateAvailableMetricFilters({ bool meterChanged = false }) {
+  void _updateAvailableMetricFilters({bool meterChanged = false}) {
     if (_selectedMeter == null || _fullApiResponse == null) {
       _availableDataFilters = [];
       _selectedDataFilters = {};
       return;
     }
-    developer.log('Updating metric filters for: $_selectedMeter', name: 'MeterScreen.DataFlow');
+    developer.log('Updating metric filters for: $_selectedMeter',
+        name: 'MeterScreen.DataFlow');
 
-    final metersList = (_fullApiResponse!['meters'] as List).cast<Map<String, dynamic>>();
-    final meterData = metersList.firstWhere((meter) => meter['meterName'] == _selectedMeter, orElse: () => <String, dynamic>{});
+    final metersList =
+        (_fullApiResponse!['meters'] as List).cast<Map<String, dynamic>>();
+    final meterData = metersList.firstWhere(
+        (meter) => meter['meterName'] == _selectedMeter,
+        orElse: () => <String, dynamic>{});
 
     final filters = <String>{};
     for (var key in meterData.keys) {
@@ -182,17 +212,22 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
     }
     filters.remove('meterName');
     _availableDataFilters = filters.toList()..sort();
-    developer.log('Available metrics for $_selectedMeter: $_availableDataFilters', name: 'MeterScreen.DataFlow');
+    developer.log(
+        'Available metrics for $_selectedMeter: $_availableDataFilters',
+        name: 'MeterScreen.DataFlow');
 
     if (meterChanged) {
-      _selectedDataFilters = _availableDataFilters.isNotEmpty ? {_availableDataFilters.first} : {};
+      _selectedDataFilters =
+          _availableDataFilters.isNotEmpty ? {_availableDataFilters.first} : {};
     } else {
-      _selectedDataFilters.removeWhere((f) => !_availableDataFilters.contains(f));
+      _selectedDataFilters
+          .removeWhere((f) => !_availableDataFilters.contains(f));
       if (_selectedDataFilters.isEmpty && _availableDataFilters.isNotEmpty) {
         _selectedDataFilters = {_availableDataFilters.first};
       }
     }
-    developer.log('Selected metrics updated to: $_selectedDataFilters', name: 'MeterScreen.DataFlow');
+    developer.log('Selected metrics updated to: $_selectedDataFilters',
+        name: 'MeterScreen.DataFlow');
   }
 
   void _clearAllState() {
@@ -205,14 +240,16 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
 
   Color _getColorForSeries(String seriesKey) {
     if (!_seriesColorMap.containsKey(seriesKey)) {
-      _seriesColorMap[seriesKey] = _modernChartColors[_colorIndex % _modernChartColors.length];
+      _seriesColorMap[seriesKey] =
+          _modernChartColors[_colorIndex % _modernChartColors.length];
       _colorIndex++;
     }
     return _seriesColorMap[seriesKey]!;
   }
 
   double _getScaleFactor(String range, String key) {
-    return _scalingFactors[range]?[key.toLowerCase().replaceAll('_', '')] ?? 1.0;
+    return _scalingFactors[range]?[key.toLowerCase().replaceAll('_', '')] ??
+        1.0;
   }
 
   String _getUnit(String range, String key) {
@@ -232,8 +269,10 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
 
   void _onDataFilterSelectionChanged(String filterKey, bool isSelected) {
     setState(() {
-      if (isSelected) _selectedDataFilters.add(filterKey);
-      else _selectedDataFilters.remove(filterKey);
+      if (isSelected)
+        _selectedDataFilters.add(filterKey);
+      else
+        _selectedDataFilters.remove(filterKey);
     });
   }
 
@@ -260,7 +299,8 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
       initialDate: _selectedDate,
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
-      initialDatePickerMode: _selectedRange == 'Year' ? DatePickerMode.year : DatePickerMode.day,
+      initialDatePickerMode:
+          _selectedRange == 'Year' ? DatePickerMode.year : DatePickerMode.day,
       builder: (context, child) {
         return Center(
           child: ConstrainedBox(
@@ -283,7 +323,9 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text("Meter Level Data", style: TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold)),
+        title: const Text("Meter Level Data",
+            style:
+                TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         elevation: 1,
         iconTheme: const IconThemeData(color: kPrimaryColor),
@@ -295,8 +337,11 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
             child: FutureBuilder<Map<String, dynamic>>(
               future: _dataFetchFuture,
               builder: (context, snapshot) {
-                final bool isLoading = snapshot.connectionState == ConnectionState.waiting;
-                final bool hasError = snapshot.hasError || !snapshot.hasData || (snapshot.data?.isEmpty ?? true);
+                final bool isLoading =
+                    snapshot.connectionState == ConnectionState.waiting;
+                final bool hasError = snapshot.hasError ||
+                    !snapshot.hasData ||
+                    (snapshot.data?.isEmpty ?? true);
 
                 if (!isLoading && !hasError && _fullApiResponse == null) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -309,22 +354,26 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
                 }
 
                 if (isLoading || (_fullApiResponse == null && !hasError)) {
-                  return const Center(child: CircularProgressIndicator(color: kPrimaryColor));
+                  return const Center(
+                      child: CircularProgressIndicator(color: kPrimaryColor));
                 }
 
                 if (hasError) {
                   return _buildEmptyState(
                       icon: Icons.error_outline,
                       title: 'Could not fetch data',
-                      message: 'Please check your connection and try again.'
-                  );
+                      message: 'Please check your connection and try again.');
                 }
 
-                final meterData = (_selectedMeter != null && _fullApiResponse != null && (_fullApiResponse!['meters'] as List).isNotEmpty)
-                    ? (_fullApiResponse!['meters'] as List).cast<Map<String, dynamic>>().firstWhere(
-                      (meter) => meter['meterName'] == _selectedMeter,
-                  orElse: () => {},
-                )
+                final meterData = (_selectedMeter != null &&
+                        _fullApiResponse != null &&
+                        (_fullApiResponse!['meters'] as List).isNotEmpty)
+                    ? (_fullApiResponse!['meters'] as List)
+                        .cast<Map<String, dynamic>>()
+                        .firstWhere(
+                          (meter) => meter['meterName'] == _selectedMeter,
+                          orElse: () => {},
+                        )
                     : null;
 
                 return Column(
@@ -336,26 +385,31 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
                           return _buildEmptyState(
                               icon: Icons.analytics_outlined,
                               title: 'No Data to Display',
-                              message: 'Select a meter and at least one metric.'
-                          );
+                              message:
+                                  'Select a meter and at least one metric.');
                         }
                         return ListView(
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                           children: _selectedDataFilters.map((filterKey) {
-                            final seriesData = (meterData[filterKey] as List?)?.cast<Map<String, dynamic>>();
-                            if(seriesData == null || seriesData.isEmpty) return const SizedBox.shrink();
+                            final seriesData = (meterData[filterKey] as List?)
+                                ?.cast<Map<String, dynamic>>();
+                            if (seriesData == null || seriesData.isEmpty)
+                              return const SizedBox.shrink();
 
                             ChartType chartType = ChartType.line;
                             String keyLower = filterKey.toLowerCase();
 
-                            if (_selectedRange == 'Week' && (keyLower.contains('energy'))) {
+                            if (_selectedRange == 'Week' &&
+                                (keyLower.contains('energy'))) {
                               chartType = ChartType.bar;
-                            } else if (_selectedRange == 'Month' && (keyLower.contains('energy'))) {
+                            } else if (_selectedRange == 'Month' &&
+                                (keyLower.contains('energy'))) {
                               chartType = ChartType.bar;
                             }
 
                             return _SingleMetricChart(
-                              title: _metricDisplayNames[filterKey] ?? filterKey,
+                              title:
+                                  _metricDisplayNames[filterKey] ?? filterKey,
                               seriesData: seriesData,
                               color: _getColorForSeries(filterKey),
                               range: _selectedRange,
@@ -390,7 +444,11 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
           const SizedBox(height: 24),
           const Align(
             alignment: Alignment.centerLeft,
-            child: Text('Meters', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: kTextSecondaryColor)),
+            child: Text('Meters',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: kTextSecondaryColor)),
           ),
           const SizedBox(height: 8),
           _buildMeterGridSelector(),
@@ -403,7 +461,8 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
     final List<String> ranges = ['Day', 'Week', 'Month', 'Year'];
     return Container(
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey.shade300, width: 1)),
+        border:
+            Border(bottom: BorderSide(color: Colors.grey.shade300, width: 1)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -420,7 +479,8 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
                       range,
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.w500,
                         color: isSelected ? kPrimaryColor : kTextSecondaryColor,
                       ),
                     ),
@@ -454,9 +514,12 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
             if (_selectedRange == 'Day') {
               newDate = _selectedDate.subtract(const Duration(days: 1));
             } else if (_selectedRange == 'Week' || _selectedRange == 'Month') {
-              newDate = DateTime(_selectedDate.year, _selectedDate.month - 1, _selectedDate.day);
-            } else { // Year
-              newDate = DateTime(_selectedDate.year - 1, _selectedDate.month, _selectedDate.day);
+              newDate = DateTime(_selectedDate.year, _selectedDate.month - 1,
+                  _selectedDate.day);
+            } else {
+              // Year
+              newDate = DateTime(_selectedDate.year - 1, _selectedDate.month,
+                  _selectedDate.day);
             }
             _onDateSelected(newDate);
           },
@@ -467,12 +530,14 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
             children: [
               Text(
                 _getDateNavigatorTitle(),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               if (_selectedRange != 'Year')
                 Text(
                   DateFormat('yyyy').format(_selectedDate),
-                  style: const TextStyle(fontSize: 14, color: kTextSecondaryColor),
+                  style:
+                      const TextStyle(fontSize: 14, color: kTextSecondaryColor),
                 ),
             ],
           ),
@@ -484,9 +549,12 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
             if (_selectedRange == 'Day') {
               newDate = _selectedDate.add(const Duration(days: 1));
             } else if (_selectedRange == 'Week' || _selectedRange == 'Month') {
-              newDate = DateTime(_selectedDate.year, _selectedDate.month + 1, _selectedDate.day);
-            } else { // Year
-              newDate = DateTime(_selectedDate.year + 1, _selectedDate.month, _selectedDate.day);
+              newDate = DateTime(_selectedDate.year, _selectedDate.month + 1,
+                  _selectedDate.day);
+            } else {
+              // Year
+              newDate = DateTime(_selectedDate.year + 1, _selectedDate.month,
+                  _selectedDate.day);
             }
             _onDateSelected(newDate);
           },
@@ -512,10 +580,16 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
   Widget _buildMeterGridSelector() {
     if (_fullApiResponse == null) {
       // Show a placeholder or loader while the initial data is being fetched and processed.
-      return const Center(heightFactor: 2, child: Text("Loading Meters...", style: TextStyle(color: kTextSecondaryColor)));
+      return const Center(
+          heightFactor: 2,
+          child: Text("Loading Meters...",
+              style: TextStyle(color: kTextSecondaryColor)));
     }
     if (_availableMeters.isEmpty) {
-      return const Center(heightFactor: 2, child: Text("No Meters Found", style: TextStyle(color: kTextSecondaryColor)));
+      return const Center(
+          heightFactor: 2,
+          child: Text("No Meters Found",
+              style: TextStyle(color: kTextSecondaryColor)));
     }
 
     return SizedBox(
@@ -532,9 +606,10 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
               onTap: () => _onMeterSelected(meterName),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? color : color.withOpacity(0.1),
+                  color: isSelected ? color : color.withValues(alpha: .1),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isSelected ? color : Colors.transparent,
@@ -564,7 +639,11 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Metrics', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: kTextSecondaryColor)),
+          const Text('Metrics',
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: kTextSecondaryColor)),
           const SizedBox(height: 8),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -576,12 +655,18 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
                 return FilterChip(
                   label: Text(_metricDisplayNames[filterKey] ?? filterKey),
                   selected: isSelected,
-                  onSelected: (bool val) => _onDataFilterSelectionChanged(filterKey, val),
-                  backgroundColor: Colors.white, selectedColor: color.withOpacity(0.1),
-                  checkmarkColor: color, shape: StadiumBorder(side: BorderSide(color: isSelected ? color : Colors.grey.shade300)),
+                  onSelected: (bool val) =>
+                      _onDataFilterSelectionChanged(filterKey, val),
+                  backgroundColor: Colors.white,
+                  selectedColor: color.withValues(alpha: .1),
+                  checkmarkColor: color,
+                  shape: StadiumBorder(
+                      side: BorderSide(
+                          color: isSelected ? color : Colors.grey.shade300)),
                   labelStyle: TextStyle(
                     color: isSelected ? color : Colors.black87,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
                 );
               }).toList(),
@@ -592,14 +677,21 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
     );
   }
 
-  Widget _buildEmptyState({required IconData icon, required String title, required String message}) {
+  Widget _buildEmptyState(
+      {required IconData icon,
+      required String title,
+      required String message}) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, size: 48, color: Colors.grey.shade400),
           const SizedBox(height: 16),
-          Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: kTextSecondaryColor)),
+          Text(title,
+              style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: kTextSecondaryColor)),
           const SizedBox(height: 4),
           Text(message, style: const TextStyle(color: kTextSecondaryColor)),
         ],
@@ -607,7 +699,6 @@ class _MeterDataScreenState extends State<MeterDataScreen> {
     );
   }
 }
-
 
 // A private widget to render a single chart for a given metric.
 class _SingleMetricChart extends StatelessWidget {
@@ -634,7 +725,7 @@ class _SingleMetricChart extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 16.0),
       elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
+      shadowColor: Colors.black.withValues(alpha: .1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SizedBox(
         height: 280,
@@ -643,12 +734,17 @@ class _SingleMetricChart extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              child: Text(title,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(right: 24.0, bottom: 12.0, left: 12.0),
-                child: chartType == ChartType.bar ? _buildBarChart(context) : _buildLineChart(context),
+                padding: const EdgeInsets.only(
+                    right: 24.0, bottom: 12.0, left: 12.0),
+                child: chartType == ChartType.bar
+                    ? _buildBarChart(context)
+                    : _buildLineChart(context),
               ),
             ),
           ],
@@ -658,7 +754,10 @@ class _SingleMetricChart extends StatelessWidget {
   }
 
   Widget _buildLineChart(BuildContext context) {
-    final String xAxisKey = seriesData.isNotEmpty && seriesData.first.containsKey('date') ? 'date' : 'time';
+    final String xAxisKey =
+        seriesData.isNotEmpty && seriesData.first.containsKey('date')
+            ? 'date'
+            : 'time';
     double maxY = 0;
     final spots = seriesData.asMap().entries.map((entry) {
       final value = ((entry.value['value'] as num?)?.toDouble() ?? 0.0) * scale;
@@ -681,8 +780,8 @@ class _SingleMetricChart extends StatelessWidget {
               show: true,
               gradient: LinearGradient(
                 colors: [
-                  color.withOpacity(0.3),
-                  color.withOpacity(0.0),
+                  color.withValues(alpha: .3),
+                  color.withValues(alpha: .0),
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -690,7 +789,11 @@ class _SingleMetricChart extends StatelessWidget {
             ),
           ),
         ],
-        gridData: FlGridData(show: true, drawVerticalLine: false, getDrawingHorizontalLine: (value) => const FlLine(color: Color(0xffe7e8ec), strokeWidth: 1)),
+        gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            getDrawingHorizontalLine: (value) =>
+                const FlLine(color: Color(0xffe7e8ec), strokeWidth: 1)),
         borderData: FlBorderData(show: false),
         titlesData: _buildTitlesData(xAxisKey),
         lineTouchData: _buildLineTouchData(xAxisKey),
@@ -699,7 +802,10 @@ class _SingleMetricChart extends StatelessWidget {
   }
 
   Widget _buildBarChart(BuildContext context) {
-    final String xAxisKey = seriesData.isNotEmpty && seriesData.first.containsKey('date') ? 'date' : 'time';
+    final String xAxisKey =
+        seriesData.isNotEmpty && seriesData.first.containsKey('date')
+            ? 'date'
+            : 'time';
     double maxY = 0;
     final barGroups = seriesData.asMap().entries.map((entry) {
       final value = ((entry.value['value'] as num?)?.toDouble() ?? 0.0) * scale;
@@ -709,15 +815,14 @@ class _SingleMetricChart extends StatelessWidget {
             toY: value,
             gradient: LinearGradient(
               colors: [
-                color.withOpacity(0.8),
+                color.withValues(alpha: .8),
                 color,
               ],
               begin: Alignment.bottomCenter,
               end: Alignment.topCenter,
             ),
             width: 16,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(4))
-        ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(4))),
       ]);
     }).toList();
 
@@ -725,7 +830,11 @@ class _SingleMetricChart extends StatelessWidget {
       BarChartData(
         maxY: maxY > 0 ? maxY * 1.2 : 10,
         barGroups: barGroups,
-        gridData: FlGridData(show: true, drawVerticalLine: false, getDrawingHorizontalLine: (value) => const FlLine(color: Color(0xffe7e8ec), strokeWidth: 1)),
+        gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            getDrawingHorizontalLine: (value) =>
+                const FlLine(color: Color(0xffe7e8ec), strokeWidth: 1)),
         borderData: FlBorderData(show: false),
         titlesData: _buildTitlesData(xAxisKey),
         barTouchData: _buildBarTouchData(xAxisKey),
@@ -738,10 +847,17 @@ class _SingleMetricChart extends StatelessWidget {
       show: true,
       topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-      leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 50, getTitlesWidget: (value, meta) {
-        if (value == meta.max || value == meta.min) return const SizedBox();
-        return Text(NumberFormat.compact().format(value), style: const TextStyle(color: kTextSecondaryColor, fontSize: 12));
-      })),
+      leftTitles: AxisTitles(
+          sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 50,
+              getTitlesWidget: (value, meta) {
+                if (value == meta.max || value == meta.min)
+                  return const SizedBox();
+                return Text(NumberFormat.compact().format(value),
+                    style: const TextStyle(
+                        color: kTextSecondaryColor, fontSize: 12));
+              })),
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
           showTitles: true,
@@ -750,7 +866,12 @@ class _SingleMetricChart extends StatelessWidget {
           getTitlesWidget: (value, meta) {
             final index = value.toInt();
             if (index >= 0 && index < seriesData.length) {
-              return SideTitleWidget(axisSide: meta.axisSide, space: 8, child: Text(seriesData[index][xAxisKey]?.toString() ?? '', style: const TextStyle(color: kTextSecondaryColor, fontSize: 12)));
+              return SideTitleWidget(
+                  axisSide: meta.axisSide,
+                  space: 8,
+                  child: Text(seriesData[index][xAxisKey]?.toString() ?? '',
+                      style: const TextStyle(
+                          color: kTextSecondaryColor, fontSize: 12)));
             }
             return const Text('');
           },
@@ -763,7 +884,7 @@ class _SingleMetricChart extends StatelessWidget {
     return LineTouchData(
       touchTooltipData: LineTouchTooltipData(
         tooltipRoundedRadius: 8,
-        getTooltipColor: (spot) => Colors.black.withOpacity(0.8),
+        getTooltipColor: (spot) => Colors.black.withValues(alpha: .8),
         getTooltipItems: (touchedSpots) {
           return touchedSpots.map((spot) {
             final index = spot.x.toInt();
@@ -774,7 +895,10 @@ class _SingleMetricChart extends StatelessWidget {
 
             return LineTooltipItem(
               '$displayLabel\n',
-              const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+              const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500),
               children: [
                 TextSpan(
                   text: scaledValue.toStringAsFixed(2),
@@ -787,7 +911,7 @@ class _SingleMetricChart extends StatelessWidget {
                 TextSpan(
                   text: ' $unit',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: .8),
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -804,7 +928,7 @@ class _SingleMetricChart extends StatelessWidget {
     return BarTouchData(
       touchTooltipData: BarTouchTooltipData(
         tooltipRoundedRadius: 8,
-        getTooltipColor: (group) => Colors.black.withOpacity(0.8),
+        getTooltipColor: (group) => Colors.black.withValues(alpha: .8),
         getTooltipItem: (group, groupIndex, rod, rodIndex) {
           final item = seriesData[groupIndex];
           final scaledValue = rod.toY;
@@ -812,7 +936,10 @@ class _SingleMetricChart extends StatelessWidget {
           final String displayLabel = 'time-$label';
           return BarTooltipItem(
               '$displayLabel\n',
-              const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+              const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500),
               children: [
                 TextSpan(
                   text: scaledValue.toStringAsFixed(2),
@@ -825,16 +952,14 @@ class _SingleMetricChart extends StatelessWidget {
                 TextSpan(
                   text: ' $unit',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: .8),
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-              ]
-          );
+              ]);
         },
       ),
     );
   }
 }
-

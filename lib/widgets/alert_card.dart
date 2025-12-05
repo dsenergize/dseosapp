@@ -13,14 +13,14 @@ class AlertCard extends StatelessWidget {
     final bool isFailed = status.toLowerCase().contains('fail');
     final Color statusColor = isFailed ? Colors.red : Colors.green;
     final IconData statusIcon =
-    isFailed ? Icons.error_outline : Icons.check_circle_outline;
+        isFailed ? Icons.error_outline : Icons.check_circle_outline;
 
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: statusColor.withOpacity(0.1),
+          backgroundColor: statusColor.withValues(alpha: .1),
           child: Icon(statusIcon, color: statusColor),
         ),
         title: Text(

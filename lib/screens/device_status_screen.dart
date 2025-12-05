@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'dart:developer' as developer;
 import '../services/api_service.dart';
 import '../theme.dart';
 import '../widgets/date_selector.dart';
@@ -35,7 +34,6 @@ const Map<String, Map<String, Color>> statusPalette = {
   },
 };
 
-
 class DeviceStatusScreen extends StatefulWidget {
   final Map<String, dynamic> plant;
   const DeviceStatusScreen({Key? key, required this.plant}) : super(key: key);
@@ -56,7 +54,8 @@ class _DeviceStatusScreenState extends State<DeviceStatusScreen> {
 
   void _fetchData() {
     setState(() {
-      _deviceStatusFuture = ApiService.getDeviceStatus(widget.plant['id'], _selectedDate);
+      _deviceStatusFuture =
+          ApiService.getDeviceStatus(widget.plant['id'], _selectedDate);
     });
   }
 
@@ -71,7 +70,8 @@ class _DeviceStatusScreenState extends State<DeviceStatusScreen> {
   // It now correctly handles nested maps for inverters.
   Map<String, dynamic> _transformData(Map<String, dynamic> rawData) {
     // Helper to process a finalized list of devices into counts and totals.
-    Map<String, dynamic> processDeviceList(List<Map<String, dynamic>> deviceList) {
+    Map<String, dynamic> processDeviceList(
+        List<Map<String, dynamic>> deviceList) {
       final statusCounts = <String, int>{};
       for (var device in deviceList) {
         final status = device['status'] as String? ?? 'Unknown';
@@ -90,9 +90,9 @@ class _DeviceStatusScreenState extends State<DeviceStatusScreen> {
     final rawInverters = rawData['inverters'];
     if (rawInverters is Map<String, dynamic>) {
       inverterList = rawInverters.values
-          .where((value) => value is List)
+          .whereType<List>()
           .expand((list) => (list as List))
-          .where((item) => item is Map<String, dynamic>)
+          .whereType<Map<String, dynamic>>()
           .cast<Map<String, dynamic>>()
           .toList();
     } else if (rawInverters is List) {
@@ -101,8 +101,11 @@ class _DeviceStatusScreenState extends State<DeviceStatusScreen> {
 
     // --- Correctly extract Meters and Weather Stations ---
     // These are assumed to be direct lists.
-    final meterList = (rawData['meters'] as List?)?.cast<Map<String, dynamic>>() ?? [];
-    final weatherStationList = (rawData['weatherStations'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+    final meterList =
+        (rawData['meters'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+    final weatherStationList =
+        (rawData['weatherStations'] as List?)?.cast<Map<String, dynamic>>() ??
+            [];
 
     return {
       'inverters': processDeviceList(inverterList),
@@ -111,13 +114,14 @@ class _DeviceStatusScreenState extends State<DeviceStatusScreen> {
     };
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Device Status', style: TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold)),
+        title: const Text('Device Status',
+            style:
+                TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         elevation: 1,
         iconTheme: const IconThemeData(color: kPrimaryColor),
@@ -128,8 +132,9 @@ class _DeviceStatusScreenState extends State<DeviceStatusScreen> {
           Card(
             margin: const EdgeInsets.all(16),
             elevation: 2,
-            shadowColor: Colors.black.withOpacity(0.1),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shadowColor: Colors.black.withValues(alpha: .1),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: DateSelector(
@@ -144,9 +149,12 @@ class _DeviceStatusScreenState extends State<DeviceStatusScreen> {
               future: _deviceStatusFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator(color: kPrimaryColor));
+                  return const Center(
+                      child: CircularProgressIndicator(color: kPrimaryColor));
                 }
-                if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+                if (snapshot.hasError ||
+                    !snapshot.hasData ||
+                    snapshot.data!.isEmpty) {
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.all(24.0),
@@ -205,7 +213,6 @@ class _DeviceStatusCard extends StatefulWidget {
   final List<dynamic> devices;
   final Map<String, dynamic> statusCounts;
 
-
   const _DeviceStatusCard({
     required this.title,
     required this.total,
@@ -224,7 +231,7 @@ class _DeviceStatusCardState extends State<_DeviceStatusCard> {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
+      shadowColor: Colors.black.withValues(alpha: .1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -238,9 +245,13 @@ class _DeviceStatusCardState extends State<_DeviceStatusCard> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(widget.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text(widget.title,
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    Text('${widget.total} Devices', style: const TextStyle(color: kTextSecondaryColor, fontSize: 14)),
+                    Text('${widget.total} Devices',
+                        style: const TextStyle(
+                            color: kTextSecondaryColor, fontSize: 14)),
                   ],
                 ),
                 // Status counts
@@ -248,18 +259,23 @@ class _DeviceStatusCardState extends State<_DeviceStatusCard> {
                   children: widget.statusCounts.entries.map((entry) {
                     final status = entry.key;
                     final count = entry.value;
-                    final colors = statusPalette[status] ?? statusPalette['Unknown']!;
+                    final colors =
+                        statusPalette[status] ?? statusPalette['Unknown']!;
                     return Padding(
                       padding: const EdgeInsets.only(left: 8.0),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
                           color: colors['bg'],
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           count.toString(),
-                          style: TextStyle(color: colors['text'], fontWeight: FontWeight.bold, fontSize: 16),
+                          style: TextStyle(
+                              color: colors['text'],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
                         ),
                       ),
                     );
@@ -282,7 +298,8 @@ class _DeviceStatusCardState extends State<_DeviceStatusCard> {
                           touchedIndex = -1;
                           return;
                         }
-                        touchedIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
+                        touchedIndex = pieTouchResponse
+                            .touchedSection!.touchedSectionIndex;
                       });
                     },
                   ),
@@ -302,10 +319,12 @@ class _DeviceStatusCardState extends State<_DeviceStatusCard> {
                 child: Row(
                   children: widget.devices.map((device) {
                     final status = device['status'] as String? ?? 'Unknown';
-                    final colors = statusPalette[status] ?? statusPalette['Unknown']!;
+                    final colors =
+                        statusPalette[status] ?? statusPalette['Unknown']!;
                     return Container(
                       margin: const EdgeInsets.only(right: 8),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: colors['bg'],
                         borderRadius: BorderRadius.circular(20),
@@ -365,4 +384,3 @@ class _DeviceStatusCardState extends State<_DeviceStatusCard> {
     }).toList();
   }
 }
-

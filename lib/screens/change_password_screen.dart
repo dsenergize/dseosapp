@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import '../theme.dart';
 
@@ -52,7 +51,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         Navigator.pop(context);
       } else {
         setState(() => _error =
-        "Failed to change password. Please check your current password.");
+            "Failed to change password. Please check your current password.");
       }
     } catch (e) {
       setState(() => _error = e.toString());
@@ -80,7 +79,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           Card(
             elevation: 2,
             shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Form(
@@ -147,13 +146,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             onPressed: _isLoading ? null : _changePassword,
             child: _isLoading
                 ? const SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(
-                  color: Colors.white, strokeWidth: 3),
-            )
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 3),
+                  )
                 : const Text("Update Password",
-                style: TextStyle(fontSize: 16, color: Colors.white)),
+                    style: TextStyle(fontSize: 16, color: Colors.white)),
           ),
         ],
       ),

@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
 import 'package:intl/intl.dart';
 import '../services/api_service.dart';
-import '../widgets/date_selector.dart';
 import '../widgets/single_metric_chart.dart';
 import '../theme.dart';
-import 'dart:math';
 
 class PlantLevelDataScreen extends StatefulWidget {
   final Map<String, dynamic> plant;
@@ -36,7 +34,6 @@ class _PlantLevelDataScreenState extends State<PlantLevelDataScreen> {
     Colors.amber.shade200,
   ];
   int _colorIndex = 0;
-
 
   @override
   void initState() {
@@ -78,24 +75,33 @@ class _PlantLevelDataScreenState extends State<PlantLevelDataScreen> {
   }
 
   Future<Map<String, dynamic>> _fetchWeeklyData(DateTime date) async {
-    developer.log('Fetching PLANT WEEK data for plant ${widget.plant['id']} on $date', name: 'PlantLevelDataScreen');
-    final rawData = await ApiService.getPlantDailyReport(widget.plant['id'], date);
+    developer.log(
+        'Fetching PLANT WEEK data for plant ${widget.plant['id']} on $date',
+        name: 'PlantLevelDataScreen');
+    final rawData =
+        await ApiService.getPlantDailyReport(widget.plant['id'], date);
     return Map<String, dynamic>.fromEntries(
       rawData.entries.where((entry) => entry.value is List),
     );
   }
 
   Future<Map<String, dynamic>> _fetchMonthlyData(DateTime date) async {
-    developer.log('Fetching PLANT MONTH data for plant ${widget.plant['id']} on $date', name: 'PlantLevelDataScreen');
-    final rawData = await ApiService.getPlantMonthlyReport(widget.plant['id'], date);
+    developer.log(
+        'Fetching PLANT MONTH data for plant ${widget.plant['id']} on $date',
+        name: 'PlantLevelDataScreen');
+    final rawData =
+        await ApiService.getPlantMonthlyReport(widget.plant['id'], date);
     return Map<String, dynamic>.fromEntries(
       rawData.entries.where((entry) => entry.value is List),
     );
   }
 
   Future<Map<String, dynamic>> _fetchYearlyData(DateTime date) async {
-    developer.log('Fetching PLANT YEAR data for plant ${widget.plant['id']} on $date', name: 'PlantLevelDataScreen');
-    final rawData = await ApiService.getPlantYearlyReport(widget.plant['id'], date);
+    developer.log(
+        'Fetching PLANT YEAR data for plant ${widget.plant['id']} on $date',
+        name: 'PlantLevelDataScreen');
+    final rawData =
+        await ApiService.getPlantYearlyReport(widget.plant['id'], date);
     return Map<String, dynamic>.fromEntries(
       rawData.entries.where((entry) => entry.value is List),
     );
@@ -141,7 +147,8 @@ class _PlantLevelDataScreenState extends State<PlantLevelDataScreen> {
 
   Color _getColorForSeries(String seriesName) {
     if (!_seriesColorMap.containsKey(seriesName)) {
-      _seriesColorMap[seriesName] = _modernChartColors[_colorIndex % _modernChartColors.length];
+      _seriesColorMap[seriesName] =
+          _modernChartColors[_colorIndex % _modernChartColors.length];
       _colorIndex++;
     }
     return _seriesColorMap[seriesName]!;
@@ -152,7 +159,9 @@ class _PlantLevelDataScreenState extends State<PlantLevelDataScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text("Plant Level Data", style: TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold)),
+        title: const Text("Plant Level Data",
+            style:
+                TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         elevation: 1,
         iconTheme: const IconThemeData(color: kPrimaryColor),
@@ -165,10 +174,13 @@ class _PlantLevelDataScreenState extends State<PlantLevelDataScreen> {
               future: _dataFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator(color: kPrimaryColor));
+                  return const Center(
+                      child: CircularProgressIndicator(color: kPrimaryColor));
                 }
                 if (snapshot.hasError) {
-                  return Center(child: Text("Error: ${snapshot.error}", style: const TextStyle(color: Colors.red)));
+                  return Center(
+                      child: Text("Error: ${snapshot.error}",
+                          style: const TextStyle(color: Colors.red)));
                 }
                 final data = snapshot.data ?? {};
                 if (data.isEmpty) {
@@ -183,7 +195,9 @@ class _PlantLevelDataScreenState extends State<PlantLevelDataScreen> {
                   });
                 }
 
-                final activeDataKeys = data.keys.where((key) => _activeFilters.contains(key)).toList();
+                final activeDataKeys = data.keys
+                    .where((key) => _activeFilters.contains(key))
+                    .toList();
 
                 return Column(
                   children: [
@@ -194,11 +208,15 @@ class _PlantLevelDataScreenState extends State<PlantLevelDataScreen> {
                         itemCount: activeDataKeys.length,
                         itemBuilder: (context, index) {
                           final key = activeDataKeys[index];
-                          final seriesData = (data[key] as List).cast<Map<String, dynamic>>();
+                          final seriesData =
+                              (data[key] as List).cast<Map<String, dynamic>>();
 
                           ChartType chartType;
-                          if (_selectedRange == 'Week' || _selectedRange == 'Month' || _selectedRange == 'Year') {
-                            if (key.toLowerCase().contains('energy') || key.toLowerCase().contains('export')) {
+                          if (_selectedRange == 'Week' ||
+                              _selectedRange == 'Month' ||
+                              _selectedRange == 'Year') {
+                            if (key.toLowerCase().contains('energy') ||
+                                key.toLowerCase().contains('export')) {
                               chartType = ChartType.bar;
                             } else {
                               chartType = ChartType.line;
@@ -245,7 +263,8 @@ class _PlantLevelDataScreenState extends State<PlantLevelDataScreen> {
     final List<String> ranges = ['Day', 'Week', 'Month', 'Year'];
     return Container(
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey.shade300, width: 1)),
+        border:
+            Border(bottom: BorderSide(color: Colors.grey.shade300, width: 1)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -262,7 +281,8 @@ class _PlantLevelDataScreenState extends State<PlantLevelDataScreen> {
                       range,
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.w500,
                         color: isSelected ? kPrimaryColor : kTextSecondaryColor,
                       ),
                     ),
@@ -310,9 +330,12 @@ class _PlantLevelDataScreenState extends State<PlantLevelDataScreen> {
             if (_selectedRange == 'Day') {
               newDate = _selectedDate.subtract(const Duration(days: 1));
             } else if (_selectedRange == 'Week' || _selectedRange == 'Month') {
-              newDate = DateTime(_selectedDate.year, _selectedDate.month - 1, _selectedDate.day);
-            } else { // Year
-              newDate = DateTime(_selectedDate.year - 1, _selectedDate.month, _selectedDate.day);
+              newDate = DateTime(_selectedDate.year, _selectedDate.month - 1,
+                  _selectedDate.day);
+            } else {
+              // Year
+              newDate = DateTime(_selectedDate.year - 1, _selectedDate.month,
+                  _selectedDate.day);
             }
             _onDateSelected(newDate);
           },
@@ -323,12 +346,14 @@ class _PlantLevelDataScreenState extends State<PlantLevelDataScreen> {
             children: [
               Text(
                 _getDateNavigatorTitle(),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               if (_selectedRange != 'Year')
                 Text(
                   DateFormat('yyyy').format(_selectedDate),
-                  style: const TextStyle(fontSize: 14, color: kTextSecondaryColor),
+                  style:
+                      const TextStyle(fontSize: 14, color: kTextSecondaryColor),
                 ),
             ],
           ),
@@ -340,9 +365,12 @@ class _PlantLevelDataScreenState extends State<PlantLevelDataScreen> {
             if (_selectedRange == 'Day') {
               newDate = _selectedDate.add(const Duration(days: 1));
             } else if (_selectedRange == 'Week' || _selectedRange == 'Month') {
-              newDate = DateTime(_selectedDate.year, _selectedDate.month + 1, _selectedDate.day);
-            } else { // Year
-              newDate = DateTime(_selectedDate.year + 1, _selectedDate.month, _selectedDate.day);
+              newDate = DateTime(_selectedDate.year, _selectedDate.month + 1,
+                  _selectedDate.day);
+            } else {
+              // Year
+              newDate = DateTime(_selectedDate.year + 1, _selectedDate.month,
+                  _selectedDate.day);
             }
             _onDateSelected(newDate);
           },
@@ -373,9 +401,11 @@ class _PlantLevelDataScreenState extends State<PlantLevelDataScreen> {
               });
             },
             backgroundColor: Colors.white,
-            selectedColor: color.withOpacity(0.1),
+            selectedColor: color.withValues(alpha: .1),
             checkmarkColor: color,
-            shape: StadiumBorder(side: BorderSide(color: isSelected ? color : Colors.grey.shade300)),
+            shape: StadiumBorder(
+                side: BorderSide(
+                    color: isSelected ? color : Colors.grey.shade300)),
             labelStyle: TextStyle(
               color: isSelected ? color : Colors.black87,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -386,4 +416,3 @@ class _PlantLevelDataScreenState extends State<PlantLevelDataScreen> {
     );
   }
 }
-
