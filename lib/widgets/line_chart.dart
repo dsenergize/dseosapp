@@ -10,10 +10,10 @@ class LineChartWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double totalEnergy = data.fold(
-        0.0, (sum, item) => sum + ((item['dailyEnergy'] as num?)?.toDouble() ?? 0));
+    final double totalEnergy = data.fold(0.0,
+        (sum, item) => sum + ((item['dailyEnergy'] as num?)?.toDouble() ?? 0));
     final String formattedTotalEnergy =
-    NumberFormat.compact().format(totalEnergy);
+        NumberFormat.compact().format(totalEnergy);
 
     return Card(
       elevation: 4,
@@ -44,7 +44,7 @@ class LineChartWidget extends StatelessWidget {
                       drawVerticalLine: false,
                       // Ensure interval is never zero
                       horizontalInterval:
-                      (_getMaxYValue() / 4).clamp(1, double.infinity),
+                          (_getMaxYValue() / 4).clamp(1, double.infinity),
                       getDrawingHorizontalLine: (value) {
                         return const FlLine(
                           color: Color(0xffe7e8ec),
@@ -174,8 +174,8 @@ class LineChartWidget extends StatelessWidget {
         show: true,
         gradient: LinearGradient(
           colors: [
-            Colors.orange.withOpacity(0.3),
-            Colors.orangeAccent.withOpacity(0.0),
+            Colors.orange.withValues(alpha: .3),
+            Colors.orangeAccent.withValues(alpha: .0),
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,

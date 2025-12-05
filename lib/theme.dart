@@ -106,7 +106,7 @@ final appTheme = ThemeData(
 
   cardTheme: CardThemeData(
     elevation: 2,
-    shadowColor: Colors.black.withOpacity(0.05),
+    shadowColor: Colors.black.withValues(alpha: .05),
     color: kCardColor,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(16),
@@ -129,15 +129,20 @@ final appTheme = ThemeData(
 
   // --- Text Theme ---
   textTheme: TextTheme(
-    displayLarge: GoogleFonts.inter(fontSize: 34, fontWeight: FontWeight.bold, color: kTextColor),
-    displayMedium: GoogleFonts.inter(fontSize: 28, fontWeight: FontWeight.bold, color: kTextColor),
-    headlineMedium: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.bold, color: kTextColor),
-    titleLarge: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600, color: kTextColor),
-    titleMedium: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: kTextColor),
+    displayLarge: GoogleFonts.inter(
+        fontSize: 34, fontWeight: FontWeight.bold, color: kTextColor),
+    displayMedium: GoogleFonts.inter(
+        fontSize: 28, fontWeight: FontWeight.bold, color: kTextColor),
+    headlineMedium: GoogleFonts.inter(
+        fontSize: 24, fontWeight: FontWeight.bold, color: kTextColor),
+    titleLarge: GoogleFonts.inter(
+        fontSize: 20, fontWeight: FontWeight.w600, color: kTextColor),
+    titleMedium: GoogleFonts.inter(
+        fontSize: 16, fontWeight: FontWeight.w600, color: kTextColor),
     bodyLarge: GoogleFonts.inter(fontSize: 16, color: kTextColor),
     bodyMedium: GoogleFonts.inter(fontSize: 14, color: kTextColor),
     bodySmall: GoogleFonts.inter(fontSize: 12, color: kTextSecondaryColor),
-    labelLarge: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+    labelLarge: GoogleFonts.inter(
+        fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
   ),
 );
-

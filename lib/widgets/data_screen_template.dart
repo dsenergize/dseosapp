@@ -86,7 +86,7 @@ class _DataScreenTemplateState extends State<DataScreenTemplate> {
   Color _getColorForSeries(String seriesName) {
     if (!_seriesColorMap.containsKey(seriesName)) {
       _seriesColorMap[seriesName] =
-      Colors.primaries[Random().nextInt(Colors.primaries.length)];
+          Colors.primaries[Random().nextInt(Colors.primaries.length)];
     }
     return _seriesColorMap[seriesName]!;
   }
@@ -227,9 +227,11 @@ class _DataScreenTemplateState extends State<DataScreenTemplate> {
               });
             },
             backgroundColor: Colors.white,
-            selectedColor: color.withOpacity(0.1),
+            selectedColor: color.withValues(alpha: .1),
             checkmarkColor: color,
-            shape: StadiumBorder(side: BorderSide(color: isSelected ? color : Colors.grey.shade300)),
+            shape: StadiumBorder(
+                side: BorderSide(
+                    color: isSelected ? color : Colors.grey.shade300)),
             labelStyle: TextStyle(
               color: isSelected ? color : Colors.black87,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -253,7 +255,8 @@ class _DataScreenTemplateState extends State<DataScreenTemplate> {
             itemCount: activeKeys.length,
             itemBuilder: (context, index) {
               final key = activeKeys[index];
-              final seriesData = (data[key] as List).cast<Map<String, dynamic>>();
+              final seriesData =
+                  (data[key] as List).cast<Map<String, dynamic>>();
               return _buildIndividualLineChart(key, seriesData);
             },
           ),
@@ -263,7 +266,8 @@ class _DataScreenTemplateState extends State<DataScreenTemplate> {
   }
 
   // NEW: Widget for displaying a single line chart metric in a card.
-  Widget _buildIndividualLineChart(String title, List<Map<String, dynamic>> seriesData) {
+  Widget _buildIndividualLineChart(
+      String title, List<Map<String, dynamic>> seriesData) {
     final seriesColor = _getColorForSeries(title);
     double maxValue = 0;
     final spots = seriesData.asMap().entries.map((entry) {
@@ -289,7 +293,10 @@ class _DataScreenTemplateState extends State<DataScreenTemplate> {
               padding: const EdgeInsets.all(16.0),
               child: Text(
                 title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
               ),
             ),
             Expanded(
@@ -311,8 +318,8 @@ class _DataScreenTemplateState extends State<DataScreenTemplate> {
                           show: true,
                           gradient: LinearGradient(
                             colors: [
-                              seriesColor.withOpacity(0.3),
-                              seriesColor.withOpacity(0.0),
+                              seriesColor.withValues(alpha: .3),
+                              seriesColor.withValues(alpha: .0),
                             ],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
@@ -324,8 +331,10 @@ class _DataScreenTemplateState extends State<DataScreenTemplate> {
                     gridData: FlGridData(
                       show: true,
                       drawVerticalLine: false,
-                      getDrawingHorizontalLine: (value) =>
-                      const FlLine(color: Color(0xffe7e8ec), strokeWidth: 1, dashArray: [3, 4]),
+                      getDrawingHorizontalLine: (value) => const FlLine(
+                          color: Color(0xffe7e8ec),
+                          strokeWidth: 1,
+                          dashArray: [3, 4]),
                     ),
                     borderData: FlBorderData(show: false),
                   ),
@@ -342,15 +351,16 @@ class _DataScreenTemplateState extends State<DataScreenTemplate> {
     final dataList =
         (data[widget.defaultDataKey] as List?)?.cast<Map<String, dynamic>>() ??
             [];
-    if (dataList.isEmpty)
+    if (dataList.isEmpty) {
       return const Center(child: Text('No data for this period.'));
+    }
 
     final double maxValue = dataList
-        .map((e) =>
-    (e['value'] as num?)?.toDouble() ??
-        (e[widget.defaultDataKey] as num?)?.toDouble() ??
-        0)
-        .fold(0.0, max) *
+            .map((e) =>
+                (e['value'] as num?)?.toDouble() ??
+                (e[widget.defaultDataKey] as num?)?.toDouble() ??
+                0)
+            .fold(0.0, max) *
         1.2;
 
     return Container(
@@ -370,16 +380,15 @@ class _DataScreenTemplateState extends State<DataScreenTemplate> {
             show: true,
             drawVerticalLine: false,
             horizontalInterval: (maxValue > 0 ? maxValue : 100) / 4,
-            getDrawingHorizontalLine: (value) =>
-            const FlLine(color: Color(0xffe7e8ec), strokeWidth: 1, dashArray: [3, 4]),
+            getDrawingHorizontalLine: (value) => const FlLine(
+                color: Color(0xffe7e8ec), strokeWidth: 1, dashArray: [3, 4]),
           ),
         ),
       ),
     );
   }
 
-  List<BarChartGroupData> _buildBarGroups(
-      List<Map<String, dynamic>> data) {
+  List<BarChartGroupData> _buildBarGroups(List<Map<String, dynamic>> data) {
     return data.asMap().entries.map((entry) {
       final index = entry.key;
       final item = entry.value;
@@ -398,7 +407,7 @@ class _DataScreenTemplateState extends State<DataScreenTemplate> {
               ),
               gradient: LinearGradient(
                 colors: [
-                  kPrimaryColor.withOpacity(0.6),
+                  kPrimaryColor.withValues(alpha: .6),
                   kPrimaryColor,
                 ],
                 begin: Alignment.bottomCenter,
@@ -510,11 +519,11 @@ class _DataScreenTemplateState extends State<DataScreenTemplate> {
           return DateFormat('d/M').format(date);
         case 'Month':
           final date =
-          dateString != null ? DateTime.tryParse(dateString) : null;
+              dateString != null ? DateTime.tryParse(dateString) : null;
           return date != null ? DateFormat('d').format(date) : '';
         case 'Year':
           final date =
-          dateString != null ? DateTime.tryParse(dateString) : null;
+              dateString != null ? DateTime.tryParse(dateString) : null;
           return date != null ? DateFormat('MMM').format(date) : '';
         default:
           return '';

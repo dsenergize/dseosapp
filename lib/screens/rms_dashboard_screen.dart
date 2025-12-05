@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:developer' as developer;
 import 'package:flutter/services.dart';
@@ -13,7 +11,8 @@ class RMSDashboardScreen extends StatefulWidget {
   final String? plantId;
   final String? plantName;
 
-  const RMSDashboardScreen({Key? key, this.plantId, this.plantName}) : super(key: key);
+  const RMSDashboardScreen({Key? key, this.plantId, this.plantName})
+      : super(key: key);
 
   @override
   State<RMSDashboardScreen> createState() => _RMSDashboardScreenState();
@@ -39,7 +38,8 @@ class _RMSDashboardScreenState extends State<RMSDashboardScreen> {
       alertsFuture = Future.value([]);
       sevenDayGenFuture = Future.value({});
       powerVsIrradianceFuture = Future.value({});
-      developer.log("Plant ID or Plant Name is null. Cannot fetch data.", name: "RMSDashboardScreen");
+      developer.log("Plant ID or Plant Name is null. Cannot fetch data.",
+          name: "RMSDashboardScreen");
       return;
     }
 
@@ -81,7 +81,9 @@ class _RMSDashboardScreenState extends State<RMSDashboardScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: Text(widget.plantName ?? "RMS Dashboard", style: const TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold)),
+        title: Text(widget.plantName ?? "RMS Dashboard",
+            style: const TextStyle(
+                color: kPrimaryColor, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         elevation: 1,
         iconTheme: const IconThemeData(color: kPrimaryColor),
@@ -101,8 +103,9 @@ class _RMSDashboardScreenState extends State<RMSDashboardScreen> {
             // --- Date Selector ---
             Card(
               elevation: 2,
-              shadowColor: Colors.black.withOpacity(0.1),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shadowColor: Colors.black.withValues(alpha: .1),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: DateSelector(
@@ -118,10 +121,14 @@ class _RMSDashboardScreenState extends State<RMSDashboardScreen> {
               future: dashboardFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator(color: kPrimaryColor));
+                  return const Center(
+                      child: CircularProgressIndicator(color: kPrimaryColor));
                 }
-                if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('Could not load dashboard KPIs.'));
+                if (snapshot.hasError ||
+                    !snapshot.hasData ||
+                    snapshot.data!.isEmpty) {
+                  return const Center(
+                      child: Text('Could not load dashboard KPIs.'));
                 }
                 final data = snapshot.data!;
                 return Column(
@@ -132,11 +139,20 @@ class _RMSDashboardScreenState extends State<RMSDashboardScreen> {
                       title: 'Performance & Export',
                       icon: Icons.show_chart,
                       data: {
-                        'Daily Export': {'value': data['totalDailyEnergy'], 'unit': 'kWh'},
-                        'Daily Yield': {'value': data['specificYield'], 'unit': ''},
+                        'Daily Export': {
+                          'value': data['totalDailyEnergy'],
+                          'unit': 'kWh'
+                        },
+                        'Daily Yield': {
+                          'value': data['specificYield'],
+                          'unit': ''
+                        },
                         'DC CUF': {'value': data['dcCuf'], 'unit': '%'},
                         'AC CUF': {'value': data['acCuf'], 'unit': '%'},
-                        'Peak Power': {'value': data['peakPower'], 'unit': 'kW'},
+                        'Peak Power': {
+                          'value': data['peakPower'],
+                          'unit': 'kW'
+                        },
                       },
                     ),
                     const SizedBox(height: 16),
@@ -144,9 +160,18 @@ class _RMSDashboardScreenState extends State<RMSDashboardScreen> {
                       title: 'Solar Irradiance',
                       icon: Icons.wb_sunny_outlined,
                       data: {
-                        'POA Insolation': {'value': data['poaInsolation'], 'unit': 'Wh/m²'},
-                        'GHI Average': {'value': data['ghiAverage'], 'unit': 'W/m²'},
-                        'Peak Insolation': {'value': data['Peak_POA_Radiation'], 'unit': 'W/m²'},
+                        'POA Insolation': {
+                          'value': data['poaInsolation'],
+                          'unit': 'Wh/m²'
+                        },
+                        'GHI Average': {
+                          'value': data['ghiAverage'],
+                          'unit': 'W/m²'
+                        },
+                        'Peak Insolation': {
+                          'value': data['Peak_POA_Radiation'],
+                          'unit': 'W/m²'
+                        },
                       },
                     ),
                     const SizedBox(height: 16),
@@ -154,10 +179,22 @@ class _RMSDashboardScreenState extends State<RMSDashboardScreen> {
                       title: 'Weather & Impact',
                       icon: Icons.thermostat,
                       data: {
-                        'Max Module Temp': {'value': data['maxModuleTemp'], 'unit': '°C'},
-                        'Max Ambient Temp': {'value': data['maxAmbientTemp'], 'unit': '°C'},
-                        'Avg. Wind Speed': {'value': data['avgWindSpeed'], 'unit': 'm/s'},
-                        'Prevented CO2': {'value': data['preventedCo2'], 'unit': 'Tonnes'},
+                        'Max Module Temp': {
+                          'value': data['maxModuleTemp'],
+                          'unit': '°C'
+                        },
+                        'Max Ambient Temp': {
+                          'value': data['maxAmbientTemp'],
+                          'unit': '°C'
+                        },
+                        'Avg. Wind Speed': {
+                          'value': data['avgWindSpeed'],
+                          'unit': 'm/s'
+                        },
+                        'Prevented CO2': {
+                          'value': data['preventedCo2'],
+                          'unit': 'Tonnes'
+                        },
                       },
                     ),
                   ],
@@ -172,13 +209,21 @@ class _RMSDashboardScreenState extends State<RMSDashboardScreen> {
               future: alertsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const SizedBox(height: 150, child: Center(child: CircularProgressIndicator(color: kPrimaryColor)));
+                  return const SizedBox(
+                      height: 150,
+                      child: Center(
+                          child:
+                              CircularProgressIndicator(color: kPrimaryColor)));
                 }
                 if (snapshot.hasError) {
-                  return Center(child: Text('Error loading inverter status: ${snapshot.error}', style: const TextStyle(color: Colors.red)));
+                  return Center(
+                      child: Text(
+                          'Error loading inverter status: ${snapshot.error}',
+                          style: const TextStyle(color: Colors.red)));
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Padding(
+                  return const Center(
+                      child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 32.0),
                     child: Text('No inverter data found.'),
                   ));
@@ -194,21 +239,33 @@ class _RMSDashboardScreenState extends State<RMSDashboardScreen> {
               future: alertsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const SizedBox(height: 150, child: Center(child: CircularProgressIndicator(color: kPrimaryColor)));
+                  return const SizedBox(
+                      height: 150,
+                      child: Center(
+                          child:
+                              CircularProgressIndicator(color: kPrimaryColor)));
                 }
                 if (snapshot.hasError) {
-                  return Center(child: Text('Error loading alerts: ${snapshot.error}', style: const TextStyle(color: Colors.red)));
+                  return Center(
+                      child: Text('Error loading alerts: ${snapshot.error}',
+                          style: const TextStyle(color: Colors.red)));
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Card(child: ListTile(title: Text('No alerts to display.')));
+                  return const Card(
+                      child: ListTile(title: Text('No alerts to display.')));
                 }
 
-                final problemAlerts = snapshot.data!.where((a) => a['status'] != 'Generating' && a['status'] != 'Sleeping').toList();
+                final problemAlerts = snapshot.data!
+                    .where((a) =>
+                        a['status'] != 'Generating' &&
+                        a['status'] != 'Sleeping')
+                    .toList();
 
                 return Card(
                   elevation: 2,
-                  shadowColor: Colors.black.withOpacity(0.1),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shadowColor: Colors.black.withValues(alpha: .1),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
                   child: ExpansionTile(
                     title: Text("View ${problemAlerts.length} Active Alerts"),
                     children: [
@@ -225,24 +282,27 @@ class _RMSDashboardScreenState extends State<RMSDashboardScreen> {
 
             // --- Charts ---
             _buildSectionHeader('Last 7 Days Generation'),
-            _buildChartSection(sevenDayGenFuture, (data) => _SevenDayGenChart(chartData: data)),
+            _buildChartSection(sevenDayGenFuture,
+                (data) => _SevenDayGenChart(chartData: data)),
             const SizedBox(height: 24),
 
             _buildSectionHeader('Live Power vs Irradiance'),
-            _buildChartSection(
-                powerVsIrradianceFuture,
-                    (data) => _PowerVsIrradianceChart(chartData: data)
-            ),
+            _buildChartSection(powerVsIrradianceFuture,
+                (data) => _PowerVsIrradianceChart(chartData: data)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title){
+  Widget _buildSectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
-      child: Text(title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+      child: Text(title,
+          style: Theme.of(context)
+              .textTheme
+              .titleLarge
+              ?.copyWith(fontWeight: FontWeight.bold)),
     );
   }
 
@@ -254,10 +314,34 @@ class _RMSDashboardScreenState extends State<RMSDashboardScreen> {
     }
 
     final kpis = [
-      {'title': 'Inverters Energy', 'value': safeParseNum(data['totalDailyEnergy']), 'unit': 'kWh', 'icon': Icons.flash_on, 'color': Colors.blue.shade300},
-      {'title': 'Live Power', 'value': safeParseNum(data['livePower']), 'unit': 'W', 'icon': Icons.power, 'color': Colors.green.shade300},
-      {'title': 'Performance Ratio', 'value': safeParseNum(data['dayPR']), 'unit': '%', 'icon': Icons.show_chart, 'color': Colors.amber.shade300},
-      {'title': 'Lifetime Energy', 'value': safeParseNum(data['lifetimeEnergy']), 'unit': 'kWh', 'icon': Icons.storage, 'color': Colors.purple.shade300},
+      {
+        'title': 'Inverters Energy',
+        'value': safeParseNum(data['totalDailyEnergy']),
+        'unit': 'kWh',
+        'icon': Icons.flash_on,
+        'color': Colors.blue.shade300
+      },
+      {
+        'title': 'Live Power',
+        'value': safeParseNum(data['livePower']),
+        'unit': 'W',
+        'icon': Icons.power,
+        'color': Colors.green.shade300
+      },
+      {
+        'title': 'Performance Ratio',
+        'value': safeParseNum(data['dayPR']),
+        'unit': '%',
+        'icon': Icons.show_chart,
+        'color': Colors.amber.shade300
+      },
+      {
+        'title': 'Lifetime Energy',
+        'value': safeParseNum(data['lifetimeEnergy']),
+        'unit': 'kWh',
+        'icon': Icons.storage,
+        'color': Colors.purple.shade300
+      },
     ];
 
     return GridView.builder(
@@ -283,10 +367,13 @@ class _RMSDashboardScreenState extends State<RMSDashboardScreen> {
     );
   }
 
-  Widget _buildInfoCardGroup({required String title, required IconData icon, required Map<String, Map<String, dynamic>> data}) {
+  Widget _buildInfoCardGroup(
+      {required String title,
+      required IconData icon,
+      required Map<String, Map<String, dynamic>> data}) {
     return Card(
         elevation: 2,
-        shadowColor: Colors.black.withOpacity(0.1),
+        shadowColor: Colors.black.withValues(alpha: .1),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Column(
           children: [
@@ -294,13 +381,16 @@ class _RMSDashboardScreenState extends State<RMSDashboardScreen> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                   color: Colors.grey.shade200,
-                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16))
-              ),
+                  borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16))),
               child: Row(
                 children: [
                   Icon(icon, color: kTextSecondaryColor),
                   const SizedBox(width: 8),
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text(title,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16)),
                 ],
               ),
             ),
@@ -315,11 +405,12 @@ class _RMSDashboardScreenState extends State<RMSDashboardScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(entry.key, style: const TextStyle(color: kTextSecondaryColor)),
+                        Text(entry.key,
+                            style: const TextStyle(color: kTextSecondaryColor)),
                         Text(
                             '${value != null ? value.toStringAsFixed(2) : '--'} $unit',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)
-                        ),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16)),
                       ],
                     ),
                   );
@@ -327,14 +418,14 @@ class _RMSDashboardScreenState extends State<RMSDashboardScreen> {
               ),
             ),
           ],
-        )
-    );
+        ));
   }
 
-  Widget _buildChartSection(Future future, Widget Function(dynamic data) chartBuilder) {
+  Widget _buildChartSection(
+      Future future, Widget Function(dynamic data) chartBuilder) {
     return Card(
       elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
+      shadowColor: Colors.black.withValues(alpha: .1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SizedBox(
         height: 400,
@@ -342,12 +433,16 @@ class _RMSDashboardScreenState extends State<RMSDashboardScreen> {
           future: future,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator(color: kPrimaryColor));
+              return const Center(
+                  child: CircularProgressIndicator(color: kPrimaryColor));
             }
             if (snapshot.hasError) {
-              return Center(child: Text('Error loading chart data: ${snapshot.error}'));
+              return Center(
+                  child: Text('Error loading chart data: ${snapshot.error}'));
             }
-            if (!snapshot.hasData || (snapshot.data is List && snapshot.data.isEmpty) || (snapshot.data is Map && (snapshot.data as Map).isEmpty)) {
+            if (!snapshot.hasData ||
+                (snapshot.data is List && snapshot.data.isEmpty) ||
+                (snapshot.data is Map && (snapshot.data as Map).isEmpty)) {
               return const Center(child: Text('No chart data available.'));
             }
             return Padding(
@@ -370,15 +465,20 @@ class _KpiCard extends StatelessWidget {
   final IconData icon;
   final Color color;
 
-  const _KpiCard({required this.title, this.value, required this.unit, required this.icon, required this.color});
+  const _KpiCard(
+      {required this.title,
+      this.value,
+      required this.unit,
+      required this.icon,
+      required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
+      shadowColor: Colors.black.withValues(alpha: .1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: color.withOpacity(0.15),
+      color: color.withValues(alpha: .15),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
@@ -396,14 +496,21 @@ class _KpiCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(color: color.withBlue(max(0, color.blue - 50)).withGreen(max(0, color.green - 50)), fontSize: 13, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      color: color
+                          .withBlue(max(0, color.blue - 50))
+                          .withGreen(max(0, color.green - 50)),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   '${value?.toStringAsFixed(2) ?? '--'} $unit',
                   style: TextStyle(
-                    color: color.withBlue(max(0, color.blue - 100)).withGreen(max(0, color.green- 100)),
+                    color: color
+                        .withBlue(max(0, color.blue - 100))
+                        .withGreen(max(0, color.green - 100)),
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -446,19 +553,43 @@ class _InverterStatusSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final statusCounts = <String, int>{};
-    for(var alert in alerts){
+    for (var alert in alerts) {
       final status = alert['status'] ?? 'Unknown';
       statusCounts[status] = (statusCounts[status] ?? 0) + 1;
     }
 
     final kpis = [
-      {'title': 'Generating', 'icon': Icons.flash_on, 'color': Colors.green, 'count': statusCounts['Generating'] ?? 0},
-      {'title': 'Under Performance', 'icon': Icons.arrow_downward, 'color': Colors.orange, 'count': statusCounts['Under Performance'] ?? 0},
-      {'title': 'Sleeping', 'icon': Icons.nightlight_round, 'color': Colors.grey, 'count': statusCounts['Sleeping'] ?? 0},
-      {'title': 'Not Operational', 'icon': Icons.warning_amber_rounded, 'color': Colors.yellow.shade700, 'count': statusCounts['Not Operational'] ?? 0},
-      {'title': 'Comm. Failure', 'icon': Icons.signal_wifi_off, 'color': Colors.red, 'count': statusCounts['Communication Failed'] ?? 0},
+      {
+        'title': 'Generating',
+        'icon': Icons.flash_on,
+        'color': Colors.green,
+        'count': statusCounts['Generating'] ?? 0
+      },
+      {
+        'title': 'Under Performance',
+        'icon': Icons.arrow_downward,
+        'color': Colors.orange,
+        'count': statusCounts['Under Performance'] ?? 0
+      },
+      {
+        'title': 'Sleeping',
+        'icon': Icons.nightlight_round,
+        'color': Colors.grey,
+        'count': statusCounts['Sleeping'] ?? 0
+      },
+      {
+        'title': 'Not Operational',
+        'icon': Icons.warning_amber_rounded,
+        'color': Colors.yellow.shade700,
+        'count': statusCounts['Not Operational'] ?? 0
+      },
+      {
+        'title': 'Comm. Failure',
+        'icon': Icons.signal_wifi_off,
+        'color': Colors.red,
+        'count': statusCounts['Communication Failed'] ?? 0
+      },
     ];
 
     return Column(
@@ -470,32 +601,37 @@ class _InverterStatusSection extends StatelessWidget {
               crossAxisCount: 5,
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
-              childAspectRatio: 0.8
-          ),
+              childAspectRatio: 0.8),
           itemCount: kpis.length,
           itemBuilder: (context, index) {
             final kpi = kpis[index];
             return Card(
               elevation: 0,
-              color: (kpi['color'] as Color).withOpacity(0.1),
+              color: (kpi['color'] as Color).withValues(alpha: .1),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
-                  side: BorderSide(color: (kpi['color'] as Color).withOpacity(0.3))
-              ),
+                  side: BorderSide(
+                      color: (kpi['color'] as Color).withValues(alpha: .3))),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(kpi['icon'] as IconData, color: kpi['color'] as Color, size: 20),
+                  Icon(kpi['icon'] as IconData,
+                      color: kpi['color'] as Color, size: 20),
                   const SizedBox(height: 4),
                   Text(
                     (kpi['count'] as int).toString(),
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: kpi['color'] as Color),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: kpi['color'] as Color),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     kpi['title'] as String,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 10, color: (kpi['color'] as Color).withOpacity(0.8)),
+                    style: TextStyle(
+                        fontSize: 10,
+                        color: (kpi['color'] as Color).withValues(alpha: .8)),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -508,8 +644,9 @@ class _InverterStatusSection extends StatelessWidget {
         Card(
           elevation: 2,
           clipBehavior: Clip.antiAlias,
-          shadowColor: Colors.black.withOpacity(0.1),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shadowColor: Colors.black.withValues(alpha: .1),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: SizedBox(
             height: 350,
             child: SingleChildScrollView(
@@ -517,37 +654,58 @@ class _InverterStatusSection extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 child: DataTable(
                   columns: const [
-                    DataColumn(label: Text('Inverter Name', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('C Load (kW)', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('AC Load (kW)', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Daily Energy (kWh)', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Specific Yield', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Efficiency', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(
+                        label: Text('Inverter Name',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(
+                        label: Text('C Load (kW)',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(
+                        label: Text('AC Load (kW)',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(
+                        label: Text('Daily Energy (kWh)',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(
+                        label: Text('Specific Yield',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(
+                        label: Text('Efficiency',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(
+                        label: Text('Status',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
                   ],
-                  rows: alerts.map((alert) => DataRow(
-                      cells: [
-                        DataCell(Text(alert['name'] ?? 'N/A')),
-                        DataCell(Text(alert['cLoad']?.toString() ?? '-')),
-                        DataCell(Text(alert['acLoad']?.toString() ?? '-')),
-                        DataCell(Text(alert['dailyEnergy']?.toString() ?? '-')),
-                        DataCell(Text(alert['specificYield']?.toString() ?? '-')),
-                        DataCell(Text(alert['efficiency']?.toString() ?? '-')),
-                        DataCell(
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  rows: alerts
+                      .map((alert) => DataRow(cells: [
+                            DataCell(Text(alert['name'] ?? 'N/A')),
+                            DataCell(Text(alert['cLoad']?.toString() ?? '-')),
+                            DataCell(Text(alert['acLoad']?.toString() ?? '-')),
+                            DataCell(
+                                Text(alert['dailyEnergy']?.toString() ?? '-')),
+                            DataCell(Text(
+                                alert['specificYield']?.toString() ?? '-')),
+                            DataCell(
+                                Text(alert['efficiency']?.toString() ?? '-')),
+                            DataCell(Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                  color: (alert['status'] == 'Communication Failed') ? Colors.red.shade100 : Colors.green.shade100,
-                                  borderRadius: BorderRadius.circular(12)
-                              ),
-                              child: Text(
-                                  alert['status'] ?? 'Unknown',
-                                  style: TextStyle(color: (alert['status'] == 'Communication Failed') ? Colors.red.shade800 : Colors.green.shade800, fontWeight: FontWeight.w500)
-                              ),
-                            )
-                        ),
-                      ]
-                  )).toList(),
+                                  color: (alert['status'] ==
+                                          'Communication Failed')
+                                      ? Colors.red.shade100
+                                      : Colors.green.shade100,
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: Text(alert['status'] ?? 'Unknown',
+                                  style: TextStyle(
+                                      color: (alert['status'] ==
+                                              'Communication Failed')
+                                          ? Colors.red.shade800
+                                          : Colors.green.shade800,
+                                      fontWeight: FontWeight.w500)),
+                            )),
+                          ]))
+                      .toList(),
                 ),
               ),
             ),
@@ -557,7 +715,6 @@ class _InverterStatusSection extends StatelessWidget {
     );
   }
 }
-
 
 class _SevenDayGenChart extends StatefulWidget {
   final Map<String, dynamic> chartData;
@@ -571,11 +728,36 @@ class _SevenDayGenChartState extends State<_SevenDayGenChart> {
   late Map<String, bool> _visibleSeries;
 
   final Map<String, dynamic> _seriesConfig = {
-    'deemedGeneration': {'label': 'Deemed Generation', 'unit': 'kWh', 'color': Colors.green, 'isBar': true},
-    'totalDailyEnergy': {'label': 'Daily Energy', 'unit': 'kWh', 'color': Colors.lightGreen, 'isBar': true},
-    'totalDailyExport': {'label': 'Daily Export', 'unit': 'kWh', 'color': Colors.blue, 'isBar': false},
-    'poaInsolation': {'label': 'POA Insolation', 'unit': 'kWh/m²', 'color': Colors.orange, 'isBar': false},
-    'prMeter': {'label': 'PR Meters', 'unit': '%', 'color': Colors.purple, 'isBar': false},
+    'deemedGeneration': {
+      'label': 'Deemed Generation',
+      'unit': 'kWh',
+      'color': Colors.green,
+      'isBar': true
+    },
+    'totalDailyEnergy': {
+      'label': 'Daily Energy',
+      'unit': 'kWh',
+      'color': Colors.lightGreen,
+      'isBar': true
+    },
+    'totalDailyExport': {
+      'label': 'Daily Export',
+      'unit': 'kWh',
+      'color': Colors.blue,
+      'isBar': false
+    },
+    'poaInsolation': {
+      'label': 'POA Insolation',
+      'unit': 'kWh/m²',
+      'color': Colors.orange,
+      'isBar': false
+    },
+    'prMeter': {
+      'label': 'PR Meters',
+      'unit': '%',
+      'color': Colors.purple,
+      'isBar': false
+    },
   };
 
   @override
@@ -592,11 +774,11 @@ class _SevenDayGenChartState extends State<_SevenDayGenChart> {
         title: "Last 7 Days Generation",
         chartData: widget.chartData,
         seriesConfig: _seriesConfig,
-        chartBuilder: (data, visibleSeries) => _buildChartContent(data, visibleSeries),
+        chartBuilder: (data, visibleSeries) =>
+            _buildChartContent(data, visibleSeries),
       );
     }));
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -619,9 +801,11 @@ class _SevenDayGenChartState extends State<_SevenDayGenChart> {
     );
   }
 
-  Widget _buildChartContent(Map<String, dynamic> data, Map<String, bool> visibleSeries) {
+  Widget _buildChartContent(
+      Map<String, dynamic> data, Map<String, bool> visibleSeries) {
     final labels = (data['labels'] as List? ?? []).cast<String>();
-    if (labels.isEmpty) return const Center(child: Text("No data for this period."));
+    if (labels.isEmpty)
+      return const Center(child: Text("No data for this period."));
 
     return BarChart(
       BarChartData(
@@ -631,15 +815,19 @@ class _SevenDayGenChartState extends State<_SevenDayGenChart> {
         gridData: FlGridData(
           show: true,
           drawVerticalLine: false,
-          getDrawingHorizontalLine: (value) => const FlLine(color: Color(0xffe7e8ec), strokeWidth: 1),
+          getDrawingHorizontalLine: (value) =>
+              const FlLine(color: Color(0xffe7e8ec), strokeWidth: 1),
         ),
         borderData: FlBorderData(show: false),
       ),
     );
   }
 
-  List<BarChartGroupData> _buildBarGroups(List<String> labels, Map<String, dynamic> data, Map<String, bool> visibleSeries) {
-    final barKeys = _seriesConfig.keys.where((key) => _seriesConfig[key]['isBar'] && visibleSeries[key]!).toList();
+  List<BarChartGroupData> _buildBarGroups(List<String> labels,
+      Map<String, dynamic> data, Map<String, bool> visibleSeries) {
+    final barKeys = _seriesConfig.keys
+        .where((key) => _seriesConfig[key]['isBar'] && visibleSeries[key]!)
+        .toList();
     final barWidth = 8.0;
     final space = 4.0;
 
@@ -650,7 +838,8 @@ class _SevenDayGenChartState extends State<_SevenDayGenChart> {
           final key = barKeys[barIndex];
           final series = data[key] as List? ?? [];
           return BarChartRodData(
-            toY: (series.length > index ? (series[index] as num) : 0).toDouble(),
+            toY:
+                (series.length > index ? (series[index] as num) : 0).toDouble(),
             color: _seriesConfig[key]['color'],
             width: barWidth,
             borderRadius: BorderRadius.zero,
@@ -664,30 +853,38 @@ class _SevenDayGenChartState extends State<_SevenDayGenChart> {
   BarTouchData _buildBarTouchData(List<String> labels) {
     return BarTouchData(
       touchTooltipData: BarTouchTooltipData(
-        getTooltipColor: (_) => Colors.blueGrey.withOpacity(0.9),
+        getTooltipColor: (_) => Colors.blueGrey.withValues(alpha: .9),
         getTooltipItem: (group, groupIndex, rod, rodIndex) {
           List<TextSpan> children = [];
 
           _seriesConfig.forEach((key, config) {
             if (_visibleSeries[key]!) {
-              final seriesData = (widget.chartData[key] as List? ?? []).cast<num>();
+              final seriesData =
+                  (widget.chartData[key] as List? ?? []).cast<num>();
               if (seriesData.length > groupIndex) {
-                children.add(
-                    TextSpan(
-                        text: '\n${config['label']}: ',
-                        style: TextStyle(color: config['color'], fontWeight: FontWeight.bold, fontSize: 12),
-                        children: [
-                          TextSpan(
-                              text: '${seriesData[groupIndex].toStringAsFixed(2)} ${config['unit']}',
-                              style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 12))
-                        ]));
+                children.add(TextSpan(
+                    text: '\n${config['label']}: ',
+                    style: TextStyle(
+                        color: config['color'],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12),
+                    children: [
+                      TextSpan(
+                          text:
+                              '${seriesData[groupIndex].toStringAsFixed(2)} ${config['unit']}',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.normal, fontSize: 12))
+                    ]));
               }
             }
           });
 
           return BarTooltipItem(
               '${labels[groupIndex]}',
-              const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+              const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14),
               children: children);
         },
       ),
@@ -696,7 +893,8 @@ class _SevenDayGenChartState extends State<_SevenDayGenChart> {
 
   FlTitlesData _buildTitles(List<String> labels) {
     return FlTitlesData(
-      leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40)),
+      leftTitles: const AxisTitles(
+          sideTitles: SideTitles(showTitles: true, reservedSize: 40)),
       rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       bottomTitles: AxisTitles(
@@ -705,11 +903,13 @@ class _SevenDayGenChartState extends State<_SevenDayGenChart> {
           reservedSize: 30,
           getTitlesWidget: (value, meta) {
             final index = value.toInt();
-            if (index < labels.length && index % (labels.length / 7).ceil() == 0) {
+            if (index < labels.length &&
+                index % (labels.length / 7).ceil() == 0) {
               return SideTitleWidget(
                 axisSide: meta.axisSide,
                 space: 4,
-                child: Text(labels[index], style: const TextStyle(fontSize: 10)),
+                child:
+                    Text(labels[index], style: const TextStyle(fontSize: 10)),
               );
             }
             return const Text('');
@@ -718,7 +918,6 @@ class _SevenDayGenChartState extends State<_SevenDayGenChart> {
       ),
     );
   }
-
 
   Widget _buildLegend() {
     return Wrap(
@@ -765,17 +964,42 @@ class _PowerVsIrradianceChart extends StatefulWidget {
   const _PowerVsIrradianceChart({required this.chartData});
 
   @override
-  State<_PowerVsIrradianceChart> createState() => _PowerVsIrradianceChartState();
+  State<_PowerVsIrradianceChart> createState() =>
+      _PowerVsIrradianceChartState();
 }
 
 class _PowerVsIrradianceChartState extends State<_PowerVsIrradianceChart> {
   late Map<String, bool> _visibleSeries;
 
   final List<Map<String, dynamic>> _seriesConfig = [
-    {'key': 'solarPower', 'label': 'Solar Power', 'unit': 'kW', 'color': Colors.orange, 'scale': 0.001},
-    {'key': 'acPower', 'label': 'AC Power', 'unit': 'kW', 'color': Colors.teal, 'scale': 0.001},
-    {'key': 'poaRadiation', 'label': 'POA Radiation', 'unit': 'W/m²', 'color': Colors.amber, 'scale': 1.0},
-    {'key': 'ambientTemp', 'label': 'Ambient Temp', 'unit': '°C', 'color': Colors.purple, 'scale': 0.1},
+    {
+      'key': 'solarPower',
+      'label': 'Solar Power',
+      'unit': 'kW',
+      'color': Colors.orange,
+      'scale': 0.001
+    },
+    {
+      'key': 'acPower',
+      'label': 'AC Power',
+      'unit': 'kW',
+      'color': Colors.teal,
+      'scale': 0.001
+    },
+    {
+      'key': 'poaRadiation',
+      'label': 'POA Radiation',
+      'unit': 'W/m²',
+      'color': Colors.amber,
+      'scale': 1.0
+    },
+    {
+      'key': 'ambientTemp',
+      'label': 'Ambient Temp',
+      'unit': '°C',
+      'color': Colors.purple,
+      'scale': 0.1
+    },
   ];
 
   void _showFullScreenChart() {
@@ -784,7 +1008,8 @@ class _PowerVsIrradianceChartState extends State<_PowerVsIrradianceChart> {
         title: "Live Power vs Irradiance",
         chartData: widget.chartData,
         seriesConfig: _seriesConfig,
-        chartBuilder: (data, visibleSeries) => _buildChartContent(data, visibleSeries),
+        chartBuilder: (data, visibleSeries) =>
+            _buildChartContent(data, visibleSeries),
       );
     }));
   }
@@ -818,12 +1043,16 @@ class _PowerVsIrradianceChartState extends State<_PowerVsIrradianceChart> {
     );
   }
 
-  Widget _buildChartContent(Map<String, dynamic> data, Map<String, bool> visibleSeries) {
-    final longestSeries = (_seriesConfig.map((c) => (data[c['key']] as List? ?? [])).toList()
-      ..sort((a,b) => b.length.compareTo(a.length)))
-        .first.cast<Map<String, dynamic>>();
+  Widget _buildChartContent(
+      Map<String, dynamic> data, Map<String, bool> visibleSeries) {
+    final longestSeries =
+        (_seriesConfig.map((c) => (data[c['key']] as List? ?? [])).toList()
+              ..sort((a, b) => b.length.compareTo(a.length)))
+            .first
+            .cast<Map<String, dynamic>>();
 
-    if (longestSeries.isEmpty) return const Center(child: Text("No data for this period."));
+    if (longestSeries.isEmpty)
+      return const Center(child: Text("No data for this period."));
 
     return LineChart(
       LineChartData(
@@ -832,7 +1061,8 @@ class _PowerVsIrradianceChartState extends State<_PowerVsIrradianceChart> {
         gridData: FlGridData(
           show: true,
           drawVerticalLine: false,
-          getDrawingHorizontalLine: (value) => const FlLine(color: Color(0xffe7e8ec), strokeWidth: 1),
+          getDrawingHorizontalLine: (value) =>
+              const FlLine(color: Color(0xffe7e8ec), strokeWidth: 1),
         ),
         borderData: FlBorderData(show: false),
         lineTouchData: _buildLineTouchData(visibleSeries),
@@ -840,12 +1070,17 @@ class _PowerVsIrradianceChartState extends State<_PowerVsIrradianceChart> {
     );
   }
 
-  List<LineChartBarData> _buildLineBars(Map<String, dynamic> data, Map<String, bool> visibleSeries) {
-    return _seriesConfig.where((s) => visibleSeries[s['key']] == true).map((sConfig) {
-      final dataList = (data[sConfig['key']] as List? ?? []).cast<Map<String,dynamic>>();
+  List<LineChartBarData> _buildLineBars(
+      Map<String, dynamic> data, Map<String, bool> visibleSeries) {
+    return _seriesConfig
+        .where((s) => visibleSeries[s['key']] == true)
+        .map((sConfig) {
+      final dataList =
+          (data[sConfig['key']] as List? ?? []).cast<Map<String, dynamic>>();
       final spots = dataList.asMap().entries.map((entry) {
         final val = entry.value['value'];
-        return FlSpot(entry.key.toDouble(), (val is num ? val : 0.0).toDouble() * sConfig['scale']);
+        return FlSpot(entry.key.toDouble(),
+            (val is num ? val : 0.0).toDouble() * sConfig['scale']);
       }).toList();
 
       return LineChartBarData(
@@ -858,7 +1093,10 @@ class _PowerVsIrradianceChartState extends State<_PowerVsIrradianceChart> {
         belowBarData: BarAreaData(
           show: true,
           gradient: LinearGradient(
-            colors: [sConfig['color'].withOpacity(0.3),sConfig['color'].withOpacity(0.0)],
+            colors: [
+              sConfig['color'].withOpacity(0.3),
+              sConfig['color'].withOpacity(0.0)
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -870,11 +1108,13 @@ class _PowerVsIrradianceChartState extends State<_PowerVsIrradianceChart> {
   LineTouchData _buildLineTouchData(Map<String, bool> visibleSeries) {
     return LineTouchData(
       touchTooltipData: LineTouchTooltipData(
-        getTooltipColor: (_) => Colors.blueGrey.withOpacity(0.8),
+        getTooltipColor: (_) => Colors.blueGrey.withValues(alpha: .8),
         getTooltipItems: (touchedSpots) {
           return touchedSpots.map((touchedSpot) {
             final seriesIndex = touchedSpot.barIndex;
-            final visibleSeriesList = _seriesConfig.where((s) => visibleSeries[s['key']] == true).toList();
+            final visibleSeriesList = _seriesConfig
+                .where((s) => visibleSeries[s['key']] == true)
+                .toList();
             if (seriesIndex >= visibleSeriesList.length) return null;
 
             final config = visibleSeriesList[seriesIndex];
@@ -900,10 +1140,12 @@ class _PowerVsIrradianceChartState extends State<_PowerVsIrradianceChart> {
     );
   }
 
-  FlTitlesData _buildTitles(List<Map<String,dynamic>> longestSeries) {
+  FlTitlesData _buildTitles(List<Map<String, dynamic>> longestSeries) {
     return FlTitlesData(
-      leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40)),
-      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40)),
+      leftTitles: const AxisTitles(
+          sideTitles: SideTitles(showTitles: true, reservedSize: 40)),
+      rightTitles: const AxisTitles(
+          sideTitles: SideTitles(showTitles: true, reservedSize: 40)),
       topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
@@ -917,7 +1159,8 @@ class _PowerVsIrradianceChartState extends State<_PowerVsIrradianceChart> {
                 return SideTitleWidget(
                   axisSide: meta.axisSide,
                   space: 4,
-                  child: Text(longestSeries[index]['time'] ?? '', style: const TextStyle(fontSize: 10)),
+                  child: Text(longestSeries[index]['time'] ?? '',
+                      style: const TextStyle(fontSize: 10)),
                 );
               }
             }
@@ -971,9 +1214,14 @@ class _FullScreenChart extends StatefulWidget {
   final String title;
   final Map<String, dynamic> chartData;
   final dynamic seriesConfig;
-  final Widget Function(Map<String, dynamic> data, Map<String, bool> visibleSeries) chartBuilder;
+  final Widget Function(
+      Map<String, dynamic> data, Map<String, bool> visibleSeries) chartBuilder;
 
-  const _FullScreenChart({required this.title, required this.chartData, required this.seriesConfig, required this.chartBuilder});
+  const _FullScreenChart(
+      {required this.title,
+      required this.chartData,
+      required this.seriesConfig,
+      required this.chartBuilder});
 
   @override
   State<_FullScreenChart> createState() => _FullScreenChartState();
@@ -995,7 +1243,8 @@ class _FullScreenChartState extends State<_FullScreenChart> {
       };
     } else if (widget.seriesConfig is List) {
       _visibleSeries = {
-        for (var item in (widget.seriesConfig as List<Map<String,dynamic>>)) item['key']: true,
+        for (var item in (widget.seriesConfig as List<Map<String, dynamic>>))
+          item['key']: true,
       };
     }
   }
@@ -1023,19 +1272,20 @@ class _FullScreenChartState extends State<_FullScreenChart> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              Expanded(child: widget.chartBuilder(widget.chartData, _visibleSeries)),
+              Expanded(
+                  child: widget.chartBuilder(widget.chartData, _visibleSeries)),
               const SizedBox(height: 12),
               _buildLegend(),
             ],
           ),
-        )
-    );
+        ));
   }
 
   Widget _buildLegend() {
     List<Widget> legendItems = [];
-    if(widget.seriesConfig is Map) {
-      legendItems = (widget.seriesConfig as Map<String,dynamic>).entries.map((entry) {
+    if (widget.seriesConfig is Map) {
+      legendItems =
+          (widget.seriesConfig as Map<String, dynamic>).entries.map((entry) {
         final key = entry.key;
         final config = entry.value;
         final isSelected = _visibleSeries[key]!;
@@ -1045,15 +1295,22 @@ class _FullScreenChartState extends State<_FullScreenChart> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(width: 12, height: config['isBar'] ?? false ? 12 : 2, color: isSelected ? config['color'] : Colors.grey),
+              Container(
+                  width: 12,
+                  height: config['isBar'] ?? false ? 12 : 2,
+                  color: isSelected ? config['color'] : Colors.grey),
               const SizedBox(width: 4),
-              Text(config['label'], style: TextStyle(fontSize: 12, color: isSelected ? Colors.black87 : Colors.grey)),
+              Text(config['label'],
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: isSelected ? Colors.black87 : Colors.grey)),
             ],
           ),
         );
       }).toList();
     } else if (widget.seriesConfig is List) {
-      legendItems = (widget.seriesConfig as List<Map<String,dynamic>>).map((config) {
+      legendItems =
+          (widget.seriesConfig as List<Map<String, dynamic>>).map((config) {
         final key = config['key'];
         final isSelected = _visibleSeries[key]!;
 
@@ -1062,9 +1319,15 @@ class _FullScreenChartState extends State<_FullScreenChart> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(width: 12, height: 2, color: isSelected ? config['color'] : Colors.grey),
+              Container(
+                  width: 12,
+                  height: 2,
+                  color: isSelected ? config['color'] : Colors.grey),
               const SizedBox(width: 4),
-              Text(config['label'], style: TextStyle(fontSize: 12, color: isSelected ? Colors.black87 : Colors.grey)),
+              Text(config['label'],
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: isSelected ? Colors.black87 : Colors.grey)),
             ],
           ),
         );
@@ -1079,5 +1342,3 @@ class _FullScreenChartState extends State<_FullScreenChart> {
     );
   }
 }
-
-               

@@ -23,7 +23,7 @@ class EnergyChart extends StatelessWidget {
             dotData: FlDotData(show: false),
             belowBarData: BarAreaData(
               show: true,
-              color: Colors.green.withOpacity(0.3),
+              color: Colors.green.withValues(alpha: .3),
             ),
           ),
         ],

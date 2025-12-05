@@ -87,8 +87,8 @@ class SingleMetricChart extends StatelessWidget {
               show: true,
               gradient: LinearGradient(
                 colors: [
-                  color.withOpacity(0.3),
-                  color.withOpacity(0.0),
+                  color.withValues(alpha: .3),
+                  color.withValues(alpha: .0),
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -170,7 +170,7 @@ class SingleMetricChart extends StatelessWidget {
     double maxValue = 0;
     for (var item in seriesData) {
       final value = (item['value'] as num?)?.toDouble() ?? 0.0;
-      if(value > maxValue) maxValue = value;
+      if (value > maxValue) maxValue = value;
     }
 
     final barGroups = seriesData.asMap().entries.map((entry) {
@@ -189,7 +189,7 @@ class SingleMetricChart extends StatelessWidget {
               ),
               gradient: LinearGradient(
                 colors: [
-                  color.withOpacity(0.6),
+                  color.withValues(alpha: .6),
                   color,
                 ],
                 begin: Alignment.bottomCenter,
@@ -282,7 +282,6 @@ class SingleMetricChart extends StatelessWidget {
     final dateString = item['date'] as String?;
     final timeString = item['time'] as String?;
 
-
     try {
       switch (selectedRange) {
         case 'Day':
@@ -290,7 +289,20 @@ class SingleMetricChart extends StatelessWidget {
         case 'Week':
           if (dateString == null) return '';
           final parts = dateString.split(' ');
-          final monthMap = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12};
+          final monthMap = {
+            'Jan': 1,
+            'Feb': 2,
+            'Mar': 3,
+            'Apr': 4,
+            'May': 5,
+            'Jun': 6,
+            'Jul': 7,
+            'Aug': 8,
+            'Sep': 9,
+            'Oct': 10,
+            'Nov': 11,
+            'Dec': 12
+          };
           final month = monthMap[parts[0]];
           final day = int.tryParse(parts[1]);
           if (month != null && day != null) {
@@ -302,7 +314,7 @@ class SingleMetricChart extends StatelessWidget {
         case 'Year':
           if (dateString == null) return '';
           DateTime date;
-          if(dateString.contains(" ")){
+          if (dateString.contains(" ")) {
             date = DateFormat("MMM yyyy").parse(dateString);
           } else {
             date = DateTime.tryParse(dateString) ?? DateTime.now();
