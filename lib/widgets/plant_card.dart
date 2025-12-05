@@ -18,8 +18,6 @@ class PlantCard extends StatefulWidget {
 }
 
 class _PlantCardState extends State<PlantCard> {
-  bool _isToggled = true;
-
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -33,23 +31,18 @@ class _PlantCardState extends State<PlantCard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Icon(Icons.wb_sunny_outlined,
-                      size: 32, color: kPrimaryColor),
-                  SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: Switch(
-                      value: _isToggled,
-                      onChanged: (value) {
-                        setState(() {
-                          _isToggled = value;
-                        });
-                      },
-                      activeThumbColor: kPrimaryColor,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      size: 32, color: Colors.yellow),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  Expanded(
+                    child: Text(
+                      widget.plantName,
+                      style: Theme.of(context).textTheme.titleMedium,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   )
                 ],
@@ -58,16 +51,13 @@ class _PlantCardState extends State<PlantCard> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    widget.plantName,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
                   const SizedBox(height: 4),
                   Text(
                     '${widget.capacity} kW',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: kTextColor),
                   ),
                 ],
               )
